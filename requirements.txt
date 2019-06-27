@@ -1,0 +1,15 @@
+pbr!=2.1.0,>=2.0.0
+
+oslo.log
+oslo.config
+oslo.messaging
+python-openstackclient
+python-neutronclient
+python-novaclient
+keystoneauth1
+keystonemiddleware
+Paste==1.7.5.1
+PasteDeploy==1.5.2
+flask
+requests
+eventlet
