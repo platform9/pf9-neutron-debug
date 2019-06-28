@@ -31,6 +31,7 @@ def main():
     server = create_server(CONF)
     server.start()
     server.wait()
+    LOG.info('Running RPC server via RabbitMQ...')
     stop_server(server)
 
 
