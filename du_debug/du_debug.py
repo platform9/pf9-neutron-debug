@@ -1,6 +1,7 @@
 # Host Server for RPC messaging
 
 import sys
+import oslo_messaging
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -14,7 +15,7 @@ logging.set_defaults()
 
 
 class TestEndpoint(object):
-    target = oslo.messaging.Target(namespace='test', version='2.0')
+    target = oslo_messaging.Target(namespace='test', version='2.0')
 
     def __init__(self, server):
         self.server = server
@@ -37,11 +38,11 @@ def create_server(conf):
     """
     Create RPC server for handling messaging
     """
-    oslo.messaging.set_transport_defaults('myexchange')
-    transport = oslo.messaging.get_transport(conf)
-    target = oslo.messaging.Target(topic='myroutingkey', server='myserver')
+    oslo_messaging.set_transport_defaults('myexchange')
+    transport = oslo_messaging.get_transport(conf)
+    target = oslo_messaging.Target(topic='myroutingkey', server='myserver')
     endpoints = [TestEndpoint(None)]
-    server = oslo.messaging.get_rpc_server(transport, target, endpoints,
+    server = oslo_messaging.get_rpc_server(transport, target, endpoints,
                                       executor='eventlet')
     return server
 

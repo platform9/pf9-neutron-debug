@@ -1,4 +1,5 @@
 import sys
+import oslo_messaging
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -11,17 +12,17 @@ def main():
     logging.set_defaults()
     CONF(sys.argv[1:])
 
-    oslo.messaging.set_transport_defaults('myexchange')
+    oslo_messaging.set_transport_defaults('myexchange')
 
     recieve_message()
 
 
 def recieve_message():
-    transport = oslo.messaging.get_transport(CONF,
-                     url='<insert DU URL>')
-    target = oslo.messaging.Target(topic='myroutingkey', version='2.0',
+    transport = oslo_messaging.get_transport(CONF,
+                     url='rabbit://neutron:4w6IIkHQVeslNjYo@localhost:5672/')
+    target = oslo_messaging.Target(topic='myroutingkey', version='2.0',
                                    namespace='test')
-    client = oslo.messaging.RPCClient(transport, target)
+    client = oslo_messaging.RPCClient(transport, target)
     r = client.call({}, 'hello_world', name='Neutron Debugger')
     print r
 
