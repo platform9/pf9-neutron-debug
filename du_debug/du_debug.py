@@ -2,6 +2,8 @@
 
 import sys
 import oslo_messaging
+import eventlet
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -30,8 +32,8 @@ def main():
 
     server = create_server(CONF)
     server.start()
+    print 'Running RPC server via RabbitMQ...'
     server.wait()
-    LOG.info('Running RPC server via RabbitMQ...')
     stop_server(server)
 
 
