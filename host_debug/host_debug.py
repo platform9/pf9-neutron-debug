@@ -19,7 +19,7 @@ def main():
 
 def recieve_message():
     transport = oslo_messaging.get_transport(CONF,
-                     url='rabbit://neutron:4w6IIkHQVeslNjYo@localhost:5672/')
+                     url='rabbit://neutron:4w6IIkHQVeslNjYo@localhost:5673/')
     target = oslo_messaging.Target(topic='myroutingkey', version='2.0',
                                    namespace='test')
     client = oslo_messaging.RPCClient(transport, target)
