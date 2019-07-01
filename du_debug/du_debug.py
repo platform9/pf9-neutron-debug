@@ -1,5 +1,6 @@
 # Host Server for RPC messaging
 
+import time
 import sys
 import oslo_messaging
 from oslo_config import cfg
@@ -30,8 +31,10 @@ def main():
 
     server = create_server(CONF)
     server.start()
-    server.wait()
-    LOG.info('Running RPC server via RabbitMQ...')
+    while True:
+	time.sleep(10)
+    #server.wait()
+    #LOG.info('Running RPC server via RabbitMQ...')
     stop_server(server)
 
 
@@ -44,7 +47,7 @@ def create_server(conf):
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver')
     endpoints = [TestEndpoint(None)]
     server = oslo_messaging.get_rpc_server(transport, target, endpoints,
-                                      executor='eventlet')
+                                      executor='blocking')
     return server
 
 
