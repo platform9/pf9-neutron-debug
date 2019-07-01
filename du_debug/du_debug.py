@@ -30,6 +30,7 @@ class TestEndpoint(object):
 def main():
 
     CONF(sys.argv[1:])
+    print "Test"
 
     server = create_server(CONF)
     server.start()
