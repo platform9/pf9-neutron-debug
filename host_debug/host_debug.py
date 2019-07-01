@@ -1,11 +1,11 @@
 import sys
 import oslo_messaging
+import eventlet
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
 CONF = cfg.CONF
-
-
 
 def main():
     logging.register_options(CONF)
