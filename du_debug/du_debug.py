@@ -35,7 +35,7 @@ def main():
     server = create_server(CONF)
     server.start()
     while True:
-	time.sleep(10)
+	       time.sleep(10)
     print 'Running RPC server via RabbitMQ...'
     server.wait()
     stop_server(server)
