@@ -20,7 +20,7 @@ class TestEndpoint(object):
         self.server = server
 
     def hello_world(self, ctx, name):
-        return "Hello my name is %s!" % (name)
+        print "Hello my name is %s!" % (name)
 
 def main():
 
@@ -33,11 +33,12 @@ def main():
 
     try:
         server.start()
-        while True:
-            time.sleep(1)
-            recieve_message(client)
+	time.sleep(4)
+	recieve_message(client)
     except KeyboardInterrupt:
         print("Stopping server")
+
+    recieve_message(client)
 
 def create_server(conf, transport, target):
     """
@@ -48,8 +49,8 @@ def create_server(conf, transport, target):
     return server
 
 def recieve_message(client):
-    r = client.call({}, 'hello_back', name='the DU')
-    print r
+    client.cast({}, 'hello_back', name='Hypervisor Host')
+    
 
 
 def stop_server(rpc_server):
