@@ -1,4 +1,4 @@
-# Host Server for RPC messaging
+# DU Server for RPC messaging
 
 import time
 import sys
@@ -10,12 +10,8 @@ from oslo_log import log as logging
 
 CONF = cfg.CONF
 
-grp = cfg.OptGroup('mygroup')
-CONF.register_group(grp)
-
 logging.register_options(CONF)
 logging.set_defaults()
-
 
 class TestEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
@@ -26,32 +22,34 @@ class TestEndpoint(object):
     def hello_world(self, ctx, name):
         return "Hello my name is %s!" % (name)
 
-
 def main():
 
     CONF(sys.argv[1:])
-    print "Test"
+    oslo_messaging.set_transport_defaults('myexchange')
+    transport = oslo_messaging.get_transport(CONF)
+    target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
+    server = create_server(CONF, transport, target)
+    client = oslo_messaging.RPCClient(transport, target)
 
-    server = create_server(CONF)
-    server.start()
-    while True:
-	       time.sleep(10)
-    print 'Running RPC server via RabbitMQ...'
-    server.wait()
-    stop_server(server)
+    try:
+        server.start()
+        while True:
+            time.sleep(1)
+            recieve_message(client)
+    except KeyboardInterrupt:
+        print("Stopping server")
 
-
-def create_server(conf):
+def create_server(conf, transport, target):
     """
     Create RPC server for handling messaging
     """
-    oslo_messaging.set_transport_defaults('myexchange')
-    transport = oslo_messaging.get_transport(conf)
-    target = oslo_messaging.Target(topic='myroutingkey', server='myserver')
     endpoints = [TestEndpoint(None)]
-    server = oslo_messaging.get_rpc_server(transport, target, endpoints,
-                                      executor='blocking')
+    server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
+
+def recieve_message(client):
+    r = client.call({}, 'hello_back', name='the DU')
+    print r
 
 
 def stop_server(rpc_server):
