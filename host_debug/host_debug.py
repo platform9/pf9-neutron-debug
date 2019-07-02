@@ -20,7 +20,7 @@ class ResponseEndpoint(object):
         self.server = server
 
     def hello_back(self, ctx, name):
-        return "Hello back! I am %s." % (name)
+        print "Hello back! I am %s." % (name)
 
 def main():
 
@@ -31,13 +31,13 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
 
+    recieve_message(client)
     try:
         server.start()
-        while True:
-            time.sleep(1)
-            recieve_message(client)
+        time.sleep(6)
     except KeyboardInterrupt:
         print("Stopping server")
+    
 
 def create_server(conf, transport, target):
     """
@@ -48,8 +48,8 @@ def create_server(conf, transport, target):
     return server
 
 def recieve_message(client):
-    r = client.call({}, 'hello_world', name='Hypervisor Host')
-    print r
+    client.cast({}, 'hello_world', name='the DU')
+    
 
 
 
