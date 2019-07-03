@@ -4,6 +4,7 @@ import time
 import sys
 import oslo_messaging
 import eventlet
+import init_neutron_client
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -24,12 +25,20 @@ class TestEndpoint(object):
 
 def main():
 
-    CONF(sys.argv[1:])
+    CONF(sys.argv[2:])
+
+    vm_name = sys.arg[1]
+
     oslo_messaging.set_transport_defaults('myexchange')
     transport = oslo_messaging.get_transport(CONF)
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
+
+    neutron = init_neutron_client.make_neutron_object()
+
+    # DHCP Dict
+    dict = dhcp_info.create_dhcp_dict(vm_name, neutron)
 
     recieve_message(client)
     try:
@@ -48,7 +57,7 @@ def create_server(conf, transport, target):
 
 def recieve_message(client):
     client.cast({}, 'hello_back', name='Hypervisor Host')
-    
+
 
 
 def stop_server(rpc_server):
