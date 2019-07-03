@@ -9,8 +9,8 @@ import ConfigParser
 import phy_int
 import os
 import getpass
-import json_logger
-import json
+#import json_logger
+#import json
 
 DEV_PREFIX = 14
 
@@ -77,8 +77,8 @@ class DHCPChecker(HostChecker):
         return check_dhcp_result_sender(vif_names, reply, phy_port)
 
     def concat_vif_name(device_name, port_id):
-    full_name = device_name + port_id
-    return full_name[:VIF_PREFIX_LEN]
+    	full_name = device_name + port_id
+    	return full_name[:VIF_PREFIX_LEN]
 
     def get_vif_names(port_id):
         vif_names = {}

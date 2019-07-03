@@ -31,13 +31,14 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
 
-    recieve_message(client)
     try:
         server.start()
-        time.sleep(6)
+        time.sleep(4)
+        recieve_message(client)
     except KeyboardInterrupt:
         print("Stopping server")
-    
+
+    recieve_message(client)
 
 def create_server(conf, transport, target):
     """

@@ -1,9 +1,10 @@
-
+import os
 import subprocess
 import re
 
 def ovs_output():
-    with open("ovs-vsctl") as f:
+    os.system("ovs-vsctl show > ovs-vsctl.txt")
+    with open("ovs-vsctl.txt") as f:
         output = f.readlines()
     return output
 
