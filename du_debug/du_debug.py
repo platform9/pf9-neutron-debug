@@ -5,6 +5,7 @@ import sys
 import oslo_messaging
 import eventlet
 import init_neutron_client
+import dhcp_info
 
 from oslo_config import cfg
 from oslo_log import log as logging

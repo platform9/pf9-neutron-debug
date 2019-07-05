@@ -17,7 +17,7 @@ def create_dhcp_dict(vm_name, neutron):
     host_id = vm_port_dict['binding:host_id']
 
     dhcp_ports = get_all_dhcp_ports(network_id, neutron)
-    network_label = get_network_label(network_id)
+    network_label = get_network_label(network_id, neutron)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
     dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label)
 
@@ -54,7 +54,7 @@ def differentiate_hosts(vm_host_id, dhcp_ports):
 
     return same_host, different_host
 
-def get_network_label(vm_network_id):
+def get_network_label(vm_network_id, neutron):
     for network in neutron.list_networks()['networks']:
 	if network['id'] == vm_network_id:
 	    return network['provider:physical_network'] 
