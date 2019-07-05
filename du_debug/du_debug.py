@@ -27,7 +27,7 @@ def main():
 
     CONF(sys.argv[2:])
 
-    vm_name = sys.arg[1]
+    vm_name = sys.argv[1]
 
     oslo_messaging.set_transport_defaults('myexchange')
     transport = oslo_messaging.get_transport(CONF)
@@ -38,14 +38,15 @@ def main():
     neutron = init_neutron_client.make_neutron_object()
 
     # DHCP Dict
-    dict = dhcp_info.create_dhcp_dict(vm_name, neutron)
+    d = dhcp_info.create_dhcp_dict(vm_name, neutron)
 
-    recieve_message(client)
-    try:
-        server.start()
-        time.sleep(6)
-    except KeyboardInterrupt:
-        print("Stopping server")
+    recieve_message(client, d)
+
+    #try:
+    #    server.start()
+    #    time.sleep(6)
+    #except KeyboardInterrupt:
+    #    print("Stopping server")
 
 def create_server(conf, transport, target):
     """
@@ -55,10 +56,8 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-def recieve_message(client):
-    client.cast({}, 'hello_back', name='Hypervisor Host')
-
-
+def recieve_message(client, dhcp_dict):
+    client.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
 
 def stop_server(rpc_server):
     LOG.info('Stopping registry RPC server')

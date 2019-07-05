@@ -13,14 +13,14 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
-class ResponseEndpoint(object):
+class DHCPEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
 
     def __init__(self, server):
         self.server = server
 
-    def hello_back(self, ctx, name):
-        print "Hello back! I am %s." % (name)
+    def get_dhcp_dict(self, ctx, dhcp_d):
+        print "DHCP DICT:  " + dhcp_d
 
 def main():
 
@@ -33,8 +33,10 @@ def main():
 
     try:
         server.start()
-        time.sleep(4)
-        recieve_message(client)
+        while True:    
+            time.sleep(1)
+        #time.sleep(4)
+        #recieve_message(client)
     except KeyboardInterrupt:
         print("Stopping server")
 
@@ -44,13 +46,13 @@ def create_server(conf, transport, target):
     """
     Create RPC server for handling messaging
     """
-    endpoints = [ResponseEndpoint(None)]
+    endpoints = [DHCPEndpoint(None)]
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
 def recieve_message(client):
     client.cast({}, 'hello_world', name='the DU')
-    
+
 
 
 
