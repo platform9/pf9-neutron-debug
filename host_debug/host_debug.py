@@ -20,7 +20,7 @@ class DHCPEndpoint(object):
         self.server = server
 
     def get_dhcp_dict(self, ctx, dhcp_d):
-        print "DHCP DICT:  " + dhcp_d
+	print dhcp_d
 
 def main():
 
@@ -40,7 +40,7 @@ def main():
     except KeyboardInterrupt:
         print("Stopping server")
 
-    recieve_message(client)
+    #recieve_message(client)
 
 def create_server(conf, transport, target):
     """
