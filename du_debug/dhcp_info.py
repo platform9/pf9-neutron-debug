@@ -2,6 +2,7 @@ from neutronclient.v2_0 import client as neutron_client
 from novaclient import client as nova_client
 import pdb
 import os
+import sys
 from keystoneauth1 import identity
 from keystoneauth1 import session
 import init_neutron_client
@@ -10,19 +11,25 @@ DHCP_OWNER = 'network:dhcp'
 
 def create_dhcp_dict(vm_name, neutron):
 
+    vm_name = vmname_parse(vm_name)
     vm_port_dict = get_port_dict(vm_name, neutron)
     network_id = vm_port_dict['network_id']
     host_id = vm_port_dict['binding:host_id']
 
     dhcp_ports = get_all_dhcp_ports(network_id, neutron)
+    network_label = get_network_label(network_id)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
-    dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host)
+    dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label)
 
     return dhcp_dict
 
+def vmname_parse(vm_name):
+    vm_name = vm_name.replace("_", "-")
+    return vm_name    
+
 def get_port_dict(vm_name, neutron):
     for port in neutron.list_ports()['ports']:
-        if port['dns_name'] == vm_name:
+	if port['dns_name'] == vm_name:
             return port
 
 def get_all_dhcp_ports(vm_network_id, neutron):
@@ -47,29 +54,32 @@ def differentiate_hosts(vm_host_id, dhcp_ports):
 
     return same_host, different_host
 
-def format_dhcp_dict(vm_port_dict, same_host, different_host):
+def get_network_label(vm_network_id):
+    for network in neutron.list_networks()['networks']:
+	if network['id'] == vm_network_id:
+	    return network['provider:physical_network'] 
+
+def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label):
 
     dhcp_dict = {}
 
     vm_info = {}
     vm_info['network_id'] = vm_port_dict['network_id']
-    vm_info['port id'] = vm_port_dict['id']
+    vm_info['port_id'] = vm_port_dict['id']
     vm_info['device_id'] = vm_port_dict['device_id']
     vm_info['host_id'] = vm_port_dict['binding:host_id']
-    ## TODO: Figure out vm physical port
-    #vm_info['nic'] =
+    vm_info['network_label'] = network_label
     dhcp_dict['vm info'] = vm_info
 
     dhcp_same_host = []
     for port in same_host:
-        dhcp_same_host.append(port['device_id'])
-    dhcp_dict['dhcp same host'] = dhcp_same_host
+        dhcp_same_host.append({'port_id':port['id']})
+    dhcp_dict['dhcp local host'] = dhcp_same_host
 
-    # TODO: Figure out dhcp physial port
-    #dhcp_different_host = []
-    #for port in same_host:
-    #    dhcp_different_host.append({'device_id':port['device_id'], 'nic':port['nic']})
-    #dhcp_dict['dhcp different host'] = dhcp_different_host
+    dhcp_different_host = []
+    for port in different_host:
+        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label})
+    dhcp_dict['dhcp remote host'] = dhcp_different_host
 
     return dhcp_dict
 
@@ -77,9 +87,9 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host):
 # Main Function to test
 if __name__ == "__main__":
 
-    vm_name = sys.arg[1]
+    vm_name = sys.argv[1]
     neutron = init_neutron_client.make_neutron_object()
 
     # DHCP Dict
-    dict = create_dhcp_dict(vm_name, neutron)
-    print dict
+    d = create_dhcp_dict(vm_name, neutron)
+    print d
