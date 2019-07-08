@@ -25,7 +25,10 @@ class TestEndpoint(object):
         print "Hello my name is %s!" % (name)
 
 def main():
-
+ 
+    opts = [cfg.StrOpt('host')] #,cfg.StrOpt('remote_host')]
+    CONF.register_opts(opts)
+	
     CONF(sys.argv[2:])
 
     vm_name = sys.argv[1]
@@ -39,9 +42,13 @@ def main():
     neutron = init_neutron_client.make_neutron_object()
 
     # DHCP Dict
-    d = dhcp_info.create_dhcp_dict(vm_name, neutron)
+    local, remote = dhcp_info.create_dhcp_dict(vm_name, neutron)
 
-    recieve_message(client, d)
+    print local
+    print remote
+
+    local_host_recieve_message(client, local)
+    #remote_host_recieve_message(client, remote)
 
     #try:
     #    server.start()
@@ -57,8 +64,17 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-def recieve_message(client, dhcp_dict):
-    client.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
+def local_host_recieve_message(client, dhcp_dict):
+
+    cctxt = client.prepare(server=CONF.host) 
+    cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
+
+'''
+def remote_host_recieve_message(client, dhcp_dict):
+    
+    cctxt = client.prepare(server=CONF.remote_host)
+    cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
+'''
 
 def stop_server(rpc_server):
     LOG.info('Stopping registry RPC server')

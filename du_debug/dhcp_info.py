@@ -19,9 +19,9 @@ def create_dhcp_dict(vm_name, neutron):
     dhcp_ports = get_all_dhcp_ports(network_id, neutron)
     network_label = get_network_label(network_id, neutron)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
-    dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label)
-
-    return dhcp_dict
+    local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label)
+ 
+    return local_dhcp_dict, remote_dhcp_dict
 
 def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")
@@ -61,27 +61,28 @@ def get_network_label(vm_network_id, neutron):
 
 def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label):
 
-    dhcp_dict = {}
-
+    local_dhcp_dict = {}
     vm_info = {}
     vm_info['network_id'] = vm_port_dict['network_id']
     vm_info['port_id'] = vm_port_dict['id']
     vm_info['device_id'] = vm_port_dict['device_id']
     vm_info['host_id'] = vm_port_dict['binding:host_id']
     vm_info['network_label'] = network_label
-    dhcp_dict['vm info'] = vm_info
+    local_dhcp_dict['vm info'] = vm_info
 
     dhcp_same_host = []
     for port in same_host:
         dhcp_same_host.append({'port_id':port['id']})
-    dhcp_dict['dhcp local host'] = dhcp_same_host
+    local_dhcp_dict['dhcp local host'] = dhcp_same_host
 
+
+    remote_dhcp_dict = {}
     dhcp_different_host = []
     for port in different_host:
         dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label})
-    dhcp_dict['dhcp remote host'] = dhcp_different_host
+    remote_dhcp_dict['dhcp remote host'] = dhcp_different_host
 
-    return dhcp_dict
+    return local_dhcp_dict, remote_dhcp_dict
 
 
 # Main Function to test
