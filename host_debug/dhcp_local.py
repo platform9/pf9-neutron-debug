@@ -17,7 +17,7 @@ def init_dhcp_check(dhcp_dict):
 
     port_id = dhcp_dict['vm info']['port_id']
     vif_names = get_vif_names(port_id)
-    
+
     src_mac = dhcp_dict['vm info']['mac_address']
     filter = "udp port (67 or 68) and ether host %s" % src_mac
 
@@ -25,7 +25,7 @@ def init_dhcp_check(dhcp_dict):
     for k,v in vif_names.items():
         listeners.append(pcap.setup_listener(v, filter))
 
-    for dhcp_server in dhcp_dict['dhcp local host']:
+    # for dhcp_server in dhcp_dict['dhcp local host']:
         ## TODO: Add ports for DHCP tap interface to listeners
 
     inject_packets(scapy, vif_names, src_mac)
