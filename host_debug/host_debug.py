@@ -4,6 +4,7 @@ import time
 import sys
 import oslo_messaging
 import eventlet
+import dhcp_local
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -20,10 +21,13 @@ class DHCPEndpoint(object):
         self.server = server
 
     def get_dhcp_dict(self, ctx, dhcp_d):
-	print dhcp_d
+	    print dhcp_d
+        dhcp_data = dhcp_local.init_dhcp_check(dhcp_d)
+        print dhcp_data
+
 
 def main():
-    
+
     opts = [cfg.StrOpt('host')]
     CONF.register_opts(opts)
 
@@ -37,7 +41,7 @@ def main():
 
     try:
         server.start()
-        while True:    
+        while True:
             time.sleep(1)
         #time.sleep(4)
         #recieve_message(client)
