@@ -15,14 +15,15 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
-class TestEndpoint(object):
+class GetHostDataEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
 
     def __init__(self, server):
         self.server = server
 
-    def hello_world(self, ctx, name):
-        print "Hello my name is %s!" % (name)
+    def get_dict(self, ctx, d):
+        print "_______________RETURNED JSON___________________"
+	print d
 
 def main():
  
@@ -50,17 +51,18 @@ def main():
     local_host_recieve_message(client, local)
     #remote_host_recieve_message(client, remote)
 
-    #try:
-    #    server.start()
-    #    time.sleep(6)
-    #except KeyboardInterrupt:
-    #    print("Stopping server")
+    try:
+	server.start()
+	while True:
+	   time.sleep(1)
+    except KeyboardInterrupt:
+        print("Stopping server")
 
 def create_server(conf, transport, target):
     """
     Create RPC server for handling messaging
     """
-    endpoints = [TestEndpoint(None)]
+    endpoints = [GetHostDataEndpoint(None)]
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
