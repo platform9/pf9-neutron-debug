@@ -1,36 +1,28 @@
-from neutronclient.v2_0 import client as neutron_client
-from novaclient import client as nova_client
+#from neutronclient.v2_0 import client as neutron_client
+#from novaclient import client as nova_client
 import pdb
 import os
 import sys
-from keystoneauth1 import identity
-from keystoneauth1 import session
+#from keystoneauth1 import identity
+#from keystoneauth1 import session
 import init_neutron_client
+import discovery
 
 DHCP_OWNER = 'network:dhcp'
 
 def create_dhcp_dict(vm_name, neutron):
 
-    vm_name = vmname_parse(vm_name)
-    vm_port_dict = get_port_dict(vm_name, neutron)
+    vm_name = discovery.vmname_parse(vm_name)
+    vm_port_dict = discovery.get_port_dict(vm_name, neutron)
     network_id = vm_port_dict['network_id']
     host_id = vm_port_dict['binding:host_id']
 
     dhcp_ports = get_all_dhcp_ports(network_id, neutron)
-    network_label = get_network_label(network_id, neutron)
+    network_label = discovery.get_network_label(network_id, neutron)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
-    local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label)
+    local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label, neutron)
 
     return local_dhcp_dict, remote_dhcp_dict
-
-def vmname_parse(vm_name):
-    vm_name = vm_name.replace("_", "-")
-    return vm_name
-
-def get_port_dict(vm_name, neutron):
-    for port in neutron.list_ports()['ports']:
-	if port['dns_name'] == vm_name:
-            return port
 
 def get_all_dhcp_ports(vm_network_id, neutron):
     dhcp_ports = []
@@ -54,12 +46,9 @@ def differentiate_hosts(vm_host_id, dhcp_ports):
 
     return same_host, different_host
 
-def get_network_label(vm_network_id, neutron):
-    for network in neutron.list_networks()['networks']:
-	if network['id'] == vm_network_id:
-	    return network['provider:physical_network']
+def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neutron):
 
-def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label):
+    bridge_name = discovery.get_bridge_name(network_label, vm_port_dict['binding:host_id'], neutron)
 
     local_dhcp_dict = {}
     vm_info = {}
@@ -69,6 +58,7 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label):
     vm_info['host_id'] = vm_port_dict['binding:host_id']
     vm_info['network_label'] = network_label
     vm_info['mac_address'] = vm_port_dict['mac_address']
+    vm_info['bridge_name'] = bridge_name
     local_dhcp_dict['vm info'] = vm_info
 
     dhcp_same_host = []
@@ -76,11 +66,12 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label):
         dhcp_same_host.append({'port_id':port['id']})
     local_dhcp_dict['dhcp local host'] = dhcp_same_host
 
-
     remote_dhcp_dict = {}
     dhcp_different_host = []
     for port in different_host:
-        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id']})
+        dhcp_host_id = port['binding:host_id']
+        dhcp_bridge_name = discovery.get_bridge_name(network_label, dhcp_host_id, neutron)
+        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name, 'host_id':dhcp_host_id})
     remote_dhcp_dict['dhcp remote host'] = dhcp_different_host
 
     return local_dhcp_dict, remote_dhcp_dict

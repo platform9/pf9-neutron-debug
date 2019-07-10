@@ -3,9 +3,11 @@ pbr!=2.1.0,>=2.0.0
 keystoneauth1
 os_client_config
 pycap
+pypcap
 oslo.log
 oslo.config
-oslo.messaging
+oslo_messaging
+pcap-ct
 python-openstackclient
 python-neutronclient
 python-novaclient
@@ -17,3 +19,4 @@ flask
 requests
 eventlet
 scapy
+virtualenv
