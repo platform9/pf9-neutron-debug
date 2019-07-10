@@ -15,6 +15,7 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
+# Return Endpoint
 class GetHostDataEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
 
