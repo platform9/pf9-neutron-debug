@@ -1,7 +1,9 @@
 # DU Server for RPC messaging
 
-import time
 import sys
+sys.path.append('../common/')
+
+import time
 import oslo_messaging
 import eventlet
 import init_neutron_client

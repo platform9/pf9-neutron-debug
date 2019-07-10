@@ -1,8 +1,10 @@
 #from neutronclient.v2_0 import client as neutron_client
+import sys
+sys.path.append('../common/')
+
 #from novaclient import client as nova_client
 import pdb
 import os
-import sys
 #from keystoneauth1 import identity
 #from keystoneauth1 import session
 import init_neutron_client
@@ -70,6 +72,8 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neu
     dhcp_different_host = []
     for port in different_host:
         dhcp_host_id = port['binding:host_id']
+	#print "dhcp port"
+	#print port
         dhcp_bridge_name = discovery.get_bridge_name(network_label, dhcp_host_id, neutron)
         dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name, 'host_id':dhcp_host_id})
     remote_dhcp_dict['dhcp remote host'] = dhcp_different_host
