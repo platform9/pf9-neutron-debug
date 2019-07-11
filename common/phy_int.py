@@ -28,32 +28,12 @@ def find_phy_line(br_name):
             bridge_section = True
             continue
 
-        '''
-        print line
-        if "Port" in line and has_type:
-            has_type = False
-            continue
-        elif "Port" in line:
-            return interface
-        if "Interface" in line:
-            interface = line
-        if "type" in line:
-            has_type = True
-        '''
-
 def parse_line(line):
     element = re.findall('"([^"]*)"', line)
-    print element
     return element[0]
-    '''
-    element = line.split(" ")
-    element = element[-1]
-    m = re.findall("[\w\d]+",element)
-    return m[0]
-    '''
 
-def get_phy_interface():
-    int_line = find_phy_line()
+def get_phy_interface(bridge_name):
+    int_line = find_phy_line(bridge_name)
     return parse_line(int_line)
 
 # Test function

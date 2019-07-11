@@ -1,6 +1,7 @@
 import sys
 sys.path.append('../common/')
 
+import phy_int
 import pcap_driver
 import scapy_driver
 import time
@@ -20,6 +21,8 @@ def init_dhcp_check(dhcp_dict):
 
     port_id = dhcp_dict['vm info']['port_id']
     vif_names = get_vif_names(port_id)
+    phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
+    vif_names[phy_port] = phy_port
 
     src_mac = dhcp_dict['vm info']['mac_address']
     filter = "udp port (67 or 68) and ether host %s" % src_mac
