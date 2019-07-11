@@ -20,12 +20,11 @@ def init_dhcp_check(dhcp_dict):
     pcap = pcap_driver.PcapDriver()
     scapy = scapy_driver.ScapyDriver()
 
-    port_id = dhcp_dict['vm info']['port_id']
-    vif_names = discovery.get_vif_names(port_id)
-    phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
+    vif_names = {}
+    phy_port = phy_int.get_phy_interface(dhcp_dict['bridge_name'])
     vif_names["local nic:" + phy_port] = phy_port
 
-    src_mac = dhcp_dict['vm info']['mac_address']
+    src_mac = dhcp_dict['src_mac_address']
     filter = "udp port (67 or 68) and ether host %s" % src_mac
 
     listeners = []
@@ -35,14 +34,9 @@ def init_dhcp_check(dhcp_dict):
     # for dhcp_server in dhcp_dict['dhcp local host']:
         ## TODO: Add ports for DHCP tap interface to listeners
 
-    inject_packets(scapy, vif_names, src_mac)
-
     data = get_sniff_result(listeners, scapy.get_dhcp_mt)
     return data
 
-def inject_packets(scapy, vif_names, src_mac):
-    scapy.send_dhcp_over_qbr(vif_names['qbr'], src_mac)
-    time.sleep(1)
 
 def get_sniff_result(listeners,handler):
     data = dict()

@@ -2,6 +2,8 @@ import os
 import sys
 import requests
 
+VIF_PREFIX_LEN = 14
+
 # DU Side
 def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")
@@ -30,5 +32,17 @@ def get_bridge_name(network_label, host_id, neutron):
 
 
 # HOST Side
-def bridge_to_nic(bridge_name):
-    return
+def concat_vif_name(device_name, port_id):
+    full_name = device_name + port_id
+    return full_name[:VIF_PREFIX_LEN]
+
+def get_vif_names(port_id):
+    vif_names = {}
+    tap_device = concat_vif_name("tap", port_id)
+    qvb_device = concat_vif_name("qvb", port_id)
+    qbr_device = concat_vif_name("qbr", port_id)
+    qvo_device = concat_vif_name("qvo", port_id)
+
+    vif_names = {"tap":tap_device, "qvb":qvb_device,
+                 "qvo":qvo_device, "qbr":qbr_device}
+    return vif_names
