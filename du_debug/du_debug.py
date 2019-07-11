@@ -17,20 +17,27 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
+DONE_WITH_PROCESS = False
+
 # Return Endpoint
 class GetHostDataEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
 
     def __init__(self, server):
         self.server = server
+        self.counter = 0
 
     def get_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
+        self.counter = self.counter + 1
+        if self.counter == 2:
+            DONE_WITH_PROCESS = True
+
 
 def main():
 
-    opts = [cfg.StrOpt('host')] #,cfg.StrOpt('remote_host')]
+    opts = [cfg.StrOpt('host')]
     CONF.register_opts(opts)
 
     CONF(sys.argv[2:])
@@ -43,7 +50,9 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
 
-    server.start()
+    #server.start()
+
+    eventlet.spawn(server_process, server)
 
     neutron = init_neutron_client.make_neutron_object()
 
@@ -60,12 +69,17 @@ def main():
     get_remote_data(client, remote)
 
     time.sleep(4)
-    #try:
-	#server.start()
-	#while True:
-	#   time.sleep(1)
-    #except KeyboardInterrupt:
-    #    print("Stopping server")
+
+def server_process(rpcserver):
+    try:
+        rpcserver.start()
+        for i in range(0,30):
+           time.sleep(1)
+           if DONE_WITH_PROCESS is True:
+               rpcserver.stop()
+               break
+    except KeyboardInterrupt:
+        print("Stopping server")
 
 def create_server(conf, transport, target):
     """
@@ -85,7 +99,7 @@ def local_host_recieve_message(client, dhcp_dict):
     cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
 
 def remote_host_recieve_message(client, dhcp_dict):
-    
+
     print dhcp_dict
     cctxt = client.prepare(server=dhcp_dict['host_id'])
     cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
