@@ -22,7 +22,7 @@ def init_dhcp_check(dhcp_dict):
 
     vif_names = {}
     phy_port = phy_int.get_phy_interface(dhcp_dict['bridge_name'])
-    vif_names["local nic:" + phy_port] = phy_port
+    vif_names[phy_port] = phy_port
 
     src_mac = dhcp_dict['src_mac_address']
     filter = "udp port (67 or 68) and ether host %s" % src_mac
@@ -34,15 +34,14 @@ def init_dhcp_check(dhcp_dict):
     # for dhcp_server in dhcp_dict['dhcp local host']:
         ## TODO: Add ports for DHCP tap interface to listeners
 
-    data = get_sniff_result(listeners, scapy.get_dhcp_mt)
-    return data
+    return listeners
 
 
 def get_sniff_result(listeners,handler):
     data = dict()
     for listener in listeners:
         vif_pre = listener.name
-        data[vif_pre] = []
+        data["remote host:" + vif_pre] = []
         for packet in listener.readpkts():
             icmp_type = handler(str(packet[1]))
             if icmp_type is not None:

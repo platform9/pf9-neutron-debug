@@ -9,6 +9,9 @@ import eventlet
 import dhcp_local
 import dhcp_remote
 
+import scapy_driver
+import pcap_driver
+
 from oslo_config import cfg
 from oslo_log import log as logging
 
@@ -25,17 +28,24 @@ class DHCPEndpoint(object):
 
     def __init__(self, server):
         self.server = server
+	self.pcap = pcap_driver.PcapDriver()
+	self.scapy = scapy_driver.ScapyDriver()
+
 
     def get_remote_listener_data(self, ctx, data):
-        self.dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners)
+        self.dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
         return_to_du(self.dhcp_remote_data)
 
     def get_dhcp_dict(self, ctx, dhcp_d):
-        if "dhcp local host" in dhcp_d.keys():
-            self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
+        print "__________________"
+	print dhcp_d
+	print "__________________"
+	if "dhcp local host" in dhcp_d.keys():
+            print "THERE"
+	    self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
             return_to_du(self.dhcp_local_data)
         elif "dhcp remote host" in dhcp_d.keys():
-            self.listeners = dhcp_remote.init_dhcp_check(dhcp_d)
+	    self.listeners = dhcp_remote.init_dhcp_check(dhcp_d)
 
 
 def main():

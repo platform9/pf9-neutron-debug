@@ -48,7 +48,7 @@ def get_sniff_result(listeners,handler):
     data = dict()
     for listener in listeners:
         vif_pre = listener.name
-        data[vif_pre] = []
+        data["local host:" + vif_pre] = []
         for packet in listener.readpkts():
             icmp_type = handler(str(packet[1]))
             if icmp_type is not None:
