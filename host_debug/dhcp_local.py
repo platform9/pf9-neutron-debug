@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../common/')
+
 import pcap_driver
 import scapy_driver
 import time

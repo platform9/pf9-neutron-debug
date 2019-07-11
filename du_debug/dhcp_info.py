@@ -1,12 +1,8 @@
-#from neutronclient.v2_0 import client as neutron_client
 import sys
 sys.path.append('../common/')
 
-#from novaclient import client as nova_client
 import pdb
 import os
-#from keystoneauth1 import identity
-#from keystoneauth1 import session
 import init_neutron_client
 import discovery
 

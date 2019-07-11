@@ -2,6 +2,7 @@ import os
 import sys
 import requests
 
+# DU Side
 def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")
     return vm_name
@@ -26,3 +27,8 @@ def get_bridge_name(network_label, host_id, neutron):
         parts = mapping.split(':')
         if parts[0] == network_label:
             return parts[1]
+
+
+# HOST Side
+def bridge_to_nic(bridge_name):
+    return
