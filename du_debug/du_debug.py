@@ -54,12 +54,12 @@ def main():
     print remote
 
     send_to_remote_hosts(client, remote)
-    #time.sleep(4)
-    #local_host_recieve_message(client, local)
+    time.sleep(4)
+    local_host_recieve_message(client, local)
     time.sleep(2)
     get_remote_data(client, remote)
 
-    time.sleep(6)
+    time.sleep(4)
     #try:
 	#server.start()
 	#while True:
@@ -76,7 +76,7 @@ def create_server(conf, transport, target):
     return server
 
 def send_to_remote_hosts(client, remote):
-    for host in remote:
+    for host in remote['dhcp remote hosts']:
         remote_host_recieve_message(client, host)
 
 def local_host_recieve_message(client, dhcp_dict):
@@ -85,12 +85,13 @@ def local_host_recieve_message(client, dhcp_dict):
     cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
 
 def remote_host_recieve_message(client, dhcp_dict):
-
+    
+    print dhcp_dict
     cctxt = client.prepare(server=dhcp_dict['host_id'])
     cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
 
-def get_remote_data(client, remote:
-    for host in remote
+def get_remote_data(client, remote):
+    for host in remote['dhcp remote hosts']:
         cctxt = client.prepare(server=host['host_id'])
         cctxt.cast({}, 'get_remote_listener_data', data="")
 

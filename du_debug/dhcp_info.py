@@ -71,7 +71,8 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neu
 	#print "dhcp port"
 	#print port
         dhcp_bridge_name = discovery.get_bridge_name(network_label, dhcp_host_id, neutron)
-        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name, 'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address']})
+        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name, 
+		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'dhcp remote host':""})
     remote_dhcp_dict['dhcp remote hosts'] = dhcp_different_host
 
     return local_dhcp_dict, remote_dhcp_dict
