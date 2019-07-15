@@ -69,7 +69,7 @@ def main():
     send_to_remote_hosts(client, remote)
     time.sleep(2)
     local_host_recieve_message(client, local)
-    time.sleep(2)
+    time.sleep(5)
     get_remote_data(client, remote)
     server_thread.join()
 
