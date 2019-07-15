@@ -9,6 +9,7 @@ import time
 
 VIF_PREFIX_LEN = 14
 DEV_NAME_LEN = 14
+PORT_ID_PREFEX = 11
 QVB_DEV_PREFIX = "qvo"
 DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
                               'DHCPDECLINE', 'DHCPACK', 'DHCPNAK', 'DHCPRELEASE']
@@ -33,8 +34,25 @@ def init_dhcp_check(dhcp_dict):
 
     # for dhcp_server in dhcp_dict['dhcp local host']:
         ## TODO: Add ports for DHCP tap interface to listeners
+    threads = []
+    for remote_port in dhcp_dict['dhcp remote hosts']:
+        port_id = remote_port['port_id'][:PORT_ID_PREFEX]
+        t_thread = dhcp_port.create_pcap_file(port_id, remote_port['network_id'], remote_port['mac_address'], timeout=7)
+	threads.append(t_thread)
 
-    return listeners
+    return listeners, threads
+
+def merge_data(data, dhcp_dict):
+
+    dhcp_listener_data = []
+    for remote_port in dhcp_dict['dhcp remote hosts']:
+        port_id = remote_port['port_id'][:PORT_ID_PREFEX]
+        dhcp_listener_data.append(dhcp_port.get_port_data(port_id, "remote host:"))
+
+    for port in dhcp_listener_data:
+        data.update(port)
+
+    return data
 
 
 def get_sniff_result(listeners,handler):

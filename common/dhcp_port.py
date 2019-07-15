@@ -7,16 +7,16 @@ from scapy import all as scapy
 DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
                               'DHCPDECLINE', 'DHCPACK', 'DHCPNAK', 'DHCPRELEASE']
 
-def create_pcap_file(port_id, network_id, mac_address):
+def create_pcap_file(port_id, network_id, mac_address, timeout):
     dhcp_namespace = "qdhcp-" + network_id
     vif = "tap" + port_id
-    tcp_thread = threading.Thread(target=tcpdump_process,args=(dhcp_namespace, vif, mac_address,))
+    tcp_thread = threading.Thread(target=tcpdump_process,args=(dhcp_namespace, vif, mac_address,timeout,))
     tcp_thread.start()
     return tcp_thread
 
-def tcpdump_process(dhcp_ns, vif, mac):
-    os.system('ip netns exec %s timeout 4 tcpdump -l -evvvnn -i %s udp port 67 or 68 and ether host %s -w "../pcap/%s.pcap"' % (dhcp_ns, vif, mac, vif))
-    
+def tcpdump_process(dhcp_ns, vif, mac, timeout):
+    os.system('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s udp port 67 or 68 and ether host %s -w "../pcap/%s.pcap"' % (dhcp_ns, timeout, vif, mac, vif))
+
 
 def get_port_data(port_id, flag):
     vif  = "tap" + port_id

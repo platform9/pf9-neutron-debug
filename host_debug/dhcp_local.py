@@ -37,9 +37,9 @@ def init_dhcp_check(dhcp_dict):
     threads = []
     for local_port in dhcp_dict['dhcp local host']:
         port_id = local_port['port_id'][:PORT_ID_PREFEX]
-        t_thread = dhcp_port.create_pcap_file(port_id, dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
+        t_thread = dhcp_port.create_pcap_file(port_id, dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'], timeout=4)
 	threads.append(t_thread)
-	
+
     time.sleep(2)
     inject_packets(scapy, vif_names, src_mac)
 
