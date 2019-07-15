@@ -34,12 +34,17 @@ def init_dhcp_check(dhcp_dict):
     for k,v in vif_names.items():
         listeners.append(pcap.setup_listener(v, filter))
 
+    threads = []
     for local_port in dhcp_dict['dhcp local host']:
         port_id = local_port['port_id'][:PORT_ID_PREFEX]
-        dhcp_port.create_pcap_file(port_id, dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
-
-
+        t_thread = dhcp_port.create_pcap_file(port_id, dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
+	threads.append(t_thread)
+	
+    time.sleep(2)
     inject_packets(scapy, vif_names, src_mac)
+
+    for thread in threads:
+	thread.join()
 
     data = get_sniff_result(listeners, scapy.get_dhcp_mt)
 
