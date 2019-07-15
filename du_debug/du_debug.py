@@ -9,6 +9,7 @@ import eventlet
 import init_neutron_client
 import dhcp_info
 import threading
+#import log_data
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -32,10 +33,10 @@ class GetHostDataEndpoint(object):
         self.counter = 0
 
     def get_dict(self, ctx, d):
-	print "_______________RETURNED JSON___________________"
+        print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
-	self.counter = self.counter + 1
+        self.counter = self.counter + 1
         if self.counter == 2:
             stop_thread = True
 
@@ -55,9 +56,9 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
 
-    server_thread = threading.Thread(target=server_process, args=(server,))	
+    server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
-    
+
 
     neutron = init_neutron_client.make_neutron_object()
 
@@ -111,16 +112,7 @@ def remote_host_recieve_message(client, dhcp_dict):
 def get_remote_data(client, remote):
     for host in remote['dhcp remote hosts']:
         cctxt = client.prepare(server=host['host_id'])
-        cctxt.cast({}, 'get_remote_listener_data', data="")
-
-def stop_server(rpc_server):
-    LOG.info('Stopping registry RPC server')
-    if rpc_server.listener:
-        rpc_server.stop()
-        rpc_server.wait()
-    else:
-        LOG.info('No rpc listener, nothing to stop')
-
+        cctxt.cast({}, 'get_remote_listener_data', data=host)
 
 if __name__ == '__main__':
     main()

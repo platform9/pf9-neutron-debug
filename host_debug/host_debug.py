@@ -32,7 +32,7 @@ class DHCPEndpoint(object):
 	self.scapy = scapy_driver.ScapyDriver()
 
 
-    def get_remote_listener_data(self, ctx, data):
+    def get_remote_listener_data(self, ctx, remote):
         self.dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
         return_to_du(self.dhcp_remote_data)
 

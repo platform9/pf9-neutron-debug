@@ -2,6 +2,7 @@ import sys
 sys.path.append('../common/')
 
 import discovery
+import dhcp_port
 import phy_int
 import pcap_driver
 import scapy_driver
@@ -32,12 +33,21 @@ def init_dhcp_check(dhcp_dict):
     for k,v in vif_names.items():
         listeners.append(pcap.setup_listener(v, filter))
 
-    # for dhcp_server in dhcp_dict['dhcp local host']:
-        ## TODO: Add ports for DHCP tap interface to listeners
+    for local_port in dhcp_dict['dhcp local host']:
+        dhcp_port.create_pcap_file(local_port['port_id'], dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
+
 
     inject_packets(scapy, vif_names, src_mac)
 
     data = get_sniff_result(listeners, scapy.get_dhcp_mt)
+
+    dhcp_port_data = []
+    for local_port in dhcp_dict['dhcp local host']:
+        dhcp_port_data.append(dhcp_port.get_port_data(local_port['port_id']), "local host:")
+
+    for port in dhcp_port_data:
+        data.update(port)
+
     return data
 
 def inject_packets(scapy, vif_names, src_mac):
