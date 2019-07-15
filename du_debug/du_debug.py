@@ -112,7 +112,7 @@ def remote_host_recieve_message(client, dhcp_dict):
 def get_remote_data(client, remote):
     for host in remote['dhcp remote hosts']:
         cctxt = client.prepare(server=host['host_id'])
-        cctxt.cast({}, 'get_remote_listener_data', data=host)
+        cctxt.cast({}, 'get_remote_listener_data', remote=host)
 
 if __name__ == '__main__':
     main()

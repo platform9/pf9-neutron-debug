@@ -16,7 +16,7 @@ def find_phy_line(br_name):
     for i in range(0, len(lines)):
         line = lines[i]
         if port_section is True:
-            if "Bridge" not in lines[i+1]:
+            if "type" not in lines[i+1]:
                 return line
             else:
                 port_section = False

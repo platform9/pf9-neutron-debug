@@ -14,7 +14,7 @@ def create_pcap_file(port_id, network_id, mac_address):
 
 def get_port_data(port_id, flag):
     vif  = "tap" + port_id
-    packets rdpcap("../pcap/%s.pcap" % vif)
+    packets = scapy.rdpcap("../pcap/%s.pcap" % vif)
 
     data = dict()
     data[flag + vif] = []

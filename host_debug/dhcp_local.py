@@ -9,6 +9,7 @@ import scapy_driver
 import time
 
 VIF_PREFIX_LEN = 14
+PORT_ID_PREFEX = 11
 DEV_NAME_LEN = 14
 QVB_DEV_PREFIX = "qvo"
 DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
@@ -34,7 +35,8 @@ def init_dhcp_check(dhcp_dict):
         listeners.append(pcap.setup_listener(v, filter))
 
     for local_port in dhcp_dict['dhcp local host']:
-        dhcp_port.create_pcap_file(local_port['port_id'], dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
+        port_id = local_port['port_id'][:PORT_ID_PREFEX]
+        dhcp_port.create_pcap_file(port_id, dhcp_dict['vm info']['network_id'], dhcp_dict['vm info']['mac_address'])
 
 
     inject_packets(scapy, vif_names, src_mac)
@@ -43,7 +45,8 @@ def init_dhcp_check(dhcp_dict):
 
     dhcp_port_data = []
     for local_port in dhcp_dict['dhcp local host']:
-        dhcp_port_data.append(dhcp_port.get_port_data(local_port['port_id']), "local host:")
+        port_id = local_port['port_id'][:PORT_ID_PREFEX]
+        dhcp_port_data.append(dhcp_port.get_port_data(port_id, "local host:"))
 
     for port in dhcp_port_data:
         data.update(port)
