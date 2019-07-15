@@ -33,10 +33,9 @@ class DHCPEndpoint(object):
 
 
     def get_remote_listener_data(self, ctx, remote):
-        for thread in self.threads:
-            thread.join()
-        self.dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
-        self.dhcp_remote_data = dhcp_remote.merge_data(self.dhcp_remote_data, remote)
+        self.thread.join()
+        dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
+        dhcp_remote_data = dhcp_remote.merge_data(dhcp_remote_data, remote)
         return_to_du(dhcp_remote_data)
 
     def get_dhcp_dict(self, ctx, dhcp_d):
@@ -48,7 +47,7 @@ class DHCPEndpoint(object):
 	    self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
             return_to_du(self.dhcp_local_data)
         elif "dhcp remote host" in dhcp_d.keys():
-	    self.listeners, self.threads = dhcp_remote.init_dhcp_check(dhcp_d)
+	    self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
 
 
 def main():
