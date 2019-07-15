@@ -8,6 +8,7 @@ import oslo_messaging
 import eventlet
 import init_neutron_client
 import dhcp_info
+import log_data
 import threading
 #import log_data
 
@@ -21,6 +22,8 @@ logging.register_options(CONF)
 logging.set_defaults()
 LOG = logging.getLogger(__name__)
 
+logging.basicConfig(filename='debug_info.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
+                    level=logging.INFO)
 
 stop_thread = False
 
@@ -36,6 +39,7 @@ class GetHostDataEndpoint(object):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
+        log_data.log_data(d)
         self.counter = self.counter + 1
         if self.counter == 2:
             stop_thread = True

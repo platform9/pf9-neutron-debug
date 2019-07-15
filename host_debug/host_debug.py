@@ -39,15 +39,11 @@ class DHCPEndpoint(object):
         return_to_du(dhcp_remote_data)
 
     def get_dhcp_dict(self, ctx, dhcp_d):
-        print "__________________"
-	print dhcp_d
-	print "__________________"
-	if "dhcp local host" in dhcp_d.keys():
-            print "THERE"
-	    self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
+	    if "dhcp local host" in dhcp_d.keys():
+	        self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
             return_to_du(self.dhcp_local_data)
         elif "dhcp remote host" in dhcp_d.keys():
-	    self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
+	        self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
 
 
 def main():
