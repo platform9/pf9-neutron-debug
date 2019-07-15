@@ -10,6 +10,7 @@ import init_neutron_client
 import dhcp_info
 import log_data
 import threading
+import logging as logs
 #import log_data
 
 from oslo_config import cfg
@@ -22,8 +23,8 @@ logging.register_options(CONF)
 logging.set_defaults()
 LOG = logging.getLogger(__name__)
 
-logging.basicConfig(filename='debug_info.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
-                    level=logging.INFO)
+#logs.basicConfig(filename='debug_info.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
+#                    level=logging.INFO)
 
 stop_thread = False
 

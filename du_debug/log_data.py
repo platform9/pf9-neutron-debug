@@ -1,5 +1,8 @@
 import logging
 
+
+logging.basicConfig(filename='/var/log/neutron_debug/dhcp_info.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+
 def log_data(data_dict):
 
     if "local host" in data_dict.keys():
@@ -11,12 +14,12 @@ def log_data(data_dict):
 def log_local_data(data):
     logging.info("DHCP PACKET LISTENER DATA FOR LOCAL HOST")
     for k,v in data.items():
-        logging.info("INTERFACE: " + k.split(":")[1] + "   " + "PACKET DATA: " + v)
+        logging.info("INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
     logging.info("")
     return
 
 def log_remote_data(data):
     logging.info("DHCP PACKET LISTENER DATA FOR REMOTE HOST")
     for k,v in data.items():
-        logging.info("INTERFACE: " + k.split(":")[1] + "   " + "PACKET DATA: " + v)
+        logging.info("INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
     return
