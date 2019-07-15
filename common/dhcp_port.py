@@ -9,12 +9,12 @@ DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
 def create_pcap_file(port_id, network_id, mac_address):
     dhcp_namespace = "qdhcp-" + network_id
     vif = "tap" + port_id
-    os.system('ip netns exec %s tcpdump -l -evvvnn -i %s udp port 67 or 68 and ether host %s -w "/pcap/%s.pcap"'') % (dhcp_namespace, vif, mac_address, vif)
+    os.system('ip netns exec %s tcpdump -l -evvvnn -i %s udp port 67 or 68 and ether host %s -w "../pcap/%s.pcap"') % (dhcp_namespace, vif, mac_address, vif)
     return
 
 def get_port_data(port_id, flag):
     vif  = "tap" + port_id
-    packets = rdpcap("/pcap/%s.pcap" % vif)
+    packets rdpcap("../pcap/%s.pcap" % vif)
 
     data = dict()
     data[flag + vif] = []
