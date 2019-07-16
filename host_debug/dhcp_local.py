@@ -51,7 +51,7 @@ def init_dhcp_check(dhcp_dict):
     dhcp_port_data = []
     for local_port in dhcp_dict['dhcp local host']:
         port_id = local_port['port_id'][:PORT_ID_PREFEX]
-        dhcp_port_data.append(dhcp_port.get_port_data(port_id, "local host:"))
+        dhcp_port_data.append(dhcp_port.get_port_data(port_id, "local host dhcp server:"))
 
     for port in dhcp_port_data:
         data.update(port)

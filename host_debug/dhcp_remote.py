@@ -44,7 +44,7 @@ def merge_data(data, dhcp_dict):
 
     dhcp_listener_data = []
     port_id = dhcp_dict['port_id'][:PORT_ID_PREFEX]
-    dhcp_listener_data.append(dhcp_port.get_port_data(port_id, "remote host:"))
+    dhcp_listener_data.append(dhcp_port.get_port_data(port_id, "remote host dhcp server:"))
 
     for port in dhcp_listener_data:
         data.update(port)
