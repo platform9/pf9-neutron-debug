@@ -23,8 +23,6 @@ logging.register_options(CONF)
 logging.set_defaults()
 LOG = logging.getLogger(__name__)
 
-#logs.basicConfig(filename='debug_info.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S',
-#                    level=logging.INFO)
 
 stop_thread = False
 
