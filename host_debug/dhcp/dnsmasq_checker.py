@@ -10,7 +10,7 @@ def analyze_dnsmasq(dhcp_dict):
 
     process_flag = False
     os.system("ps ax | grep dnsmasq | grep % > dnsmasq.txt" % (dhcp_dict['network_id']))
-    with open('dnsmasq.txt') as file
+    with open('dnsmasq.txt') as file:
         output = file.readlines()
     for line in output:
         if "dnsmasq" in line:
@@ -23,7 +23,7 @@ def analyze_dnsmasq(dhcp_dict):
     instance_flag = False
     with open("var/opt/pf9/neutron/dhcp/%s/host" % (dhcp_dict['network_id'])) as file:
         output = file.readlines()
-    for line in output
+    for line in output:
         if dhcp_dict['mac_address'] in line and dhcp_dict['ip_address'] in line:
             instance_flag = True
             break
