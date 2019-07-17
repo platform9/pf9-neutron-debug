@@ -44,6 +44,12 @@ class GetHostDataEndpoint(object):
         if self.counter == 2:
             stop_thread = True
 
+    def get_message(self, ctx, message):
+        logs.info(message)
+        print message
+        if "CODE 0" in message or "CODE 1" in message:
+            stop_thread = True
+
 
 def main():
     opts = [cfg.StrOpt('host')]
@@ -69,13 +75,18 @@ def main():
 
     print "HEARTBEAT tests look OK, ready to move on"
 
-    sys.exit()
-
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
     # DHCP Dict
     local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
+
+    #dnsmasq
+    check_dnsmasq_process(client, local['vm_info'], local['vm_info']['host_id'])
+
+    for host in remote['dhcp remote hosts']:
+        check_dnsmasq_process(client, local['vm_info'], host['host_id'])
+
     #print local
     #print remote
     send_to_remote_hosts(client, remote)
@@ -90,7 +101,7 @@ def server_process(rpcserver):
     try:
         rpcserver.start()
 	print "Server Starting..."
-        for i in range(0,30):
+        for i in range(0,35):
            time.sleep(1)
            if stop_thread:
 	      print("All done..Stopping Server")
@@ -107,6 +118,7 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
+# RPC Message Functions
 def send_to_remote_hosts(client, remote):
     for host in remote['dhcp remote hosts']:
         remote_host_recieve_message(client, host)
@@ -125,6 +137,12 @@ def get_remote_data(client, remote):
     for host in remote['dhcp remote hosts']:
         cctxt = client.prepare(server=host['host_id'])
         cctxt.cast({}, 'get_remote_listener_data', remote=host)
+
+def check_dnsmasq_process(client, dhcp_dict, host_id):
+
+    cctxt = client.prepare(server=host_id)
+    cctxt.cast({}, 'dnsmasq_check', dhcp_d = dhcp_dict)
+
 
 if __name__ == '__main__':
     main()

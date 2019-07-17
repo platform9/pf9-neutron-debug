@@ -2,12 +2,14 @@
 
 import sys
 sys.path.append('../common/')
+sys.path.append('./dhcp/')
 
 import time
 import oslo_messaging
 import eventlet
 import dhcp_local
 import dhcp_remote
+import dnsmasq_checker
 
 import scapy_driver
 import pcap_driver
@@ -45,6 +47,13 @@ class DHCPEndpoint(object):
         elif "dhcp remote host" in dhcp_d.keys():
 	   self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
 
+    def dnsmasq_check(self, ctx, dhcp_d):
+
+        message = dnsmasq_checker.init_dnsmasq_check(dhcp_d)
+        message_to_du(message)
+
+
+
 
 def main():
 
@@ -53,8 +62,12 @@ def main():
     CONF(sys.argv[1:])
 
     oslo_messaging.set_transport_defaults('myexchange')
+    global transport
     transport = oslo_messaging.get_transport(CONF)
     target = oslo_messaging.Target(topic='myroutingkey', server=CONF.host, version='2.0', namespace='test')
+
+    global du_target
+    du_target = oslo_messaging.Target(topic='myroutingkey', server="myserver", version='2.0', namespace='test')
 
     server = create_server(CONF, transport, target)
 
@@ -68,12 +81,13 @@ def main():
 
 def return_to_du(transport_json):
 
-    oslo_messaging.set_transport_defaults('myexchange')
-    transport = oslo_messaging.get_transport(CONF)
-    target = oslo_messaging.Target(topic='myroutingkey', server="myserver", version='2.0', namespace='test')
-
-    client = oslo_messaging.RPCClient(transport, target)
+    client = oslo_messaging.RPCClient(transport, du_target)
     client.cast({}, 'get_dict', d=transport_json)
+
+def message_to_du(message):
+
+    client = oslo_messaging.RPCClient(transport, du_target)
+    client.cast({}, 'get_message', message=message)
 
 def create_server(conf, transport, target):
     """
