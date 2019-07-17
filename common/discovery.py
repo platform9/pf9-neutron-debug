@@ -5,9 +5,34 @@ import requests
 VIF_PREFIX_LEN = 14
 
 # DU Side
+def heartbeat_host(host_id, neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts', headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    for host in r.json():
+        if host_id == host['id']:
+            if host['info']['responding'] == True:
+                return 1
+            else:
+                return 0
+
+def heartbeat_port(port, neutron):
+    if port['status'] == 'ACTIVE':
+        return 1
+    else
+        return 0
+
 def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")
     return vm_name
+
+def get_all_dhcp_ports(vm_network_id, neutron):
+    dhcp_ports = []
+
+    for port in neutron.list_ports()['ports']:
+        if port['network_id'] == vm_network_id and port['device_owner'] == DHCP_OWNER:
+            dhcp_ports.append(port)
+
+    return dhcp_ports
 
 def get_port_dict(vm_name, neutron):
     for port in neutron.list_ports()['ports']:

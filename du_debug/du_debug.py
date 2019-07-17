@@ -2,16 +2,17 @@
 
 import sys
 sys.path.append('../common/')
+sys.path.append('./dhcp/')
 
 import time
 import oslo_messaging
 import eventlet
 import init_neutron_client
-import dhcp_info
+import dhcp_dynamic_info
+import dhcp_static_info
 import log_data
 import threading
 import logging as logs
-#import log_data
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -59,14 +60,22 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
 
+    neutron = init_neutron_client.make_neutron_object()
+
+    error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
+
+    if error_code:
+        sys.exit("Static Error detected -> VM, DHCP, or Host is down. Check /log/var/neutron_debug/static.log for specific error")
+
+    print "HEARTBEAT tests look OK, ready to move on"
+
+    sys.exit()
+
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
-
-    neutron = init_neutron_client.make_neutron_object()
-
     # DHCP Dict
-    local, remote = dhcp_info.create_dhcp_dict(vm_name, neutron)
+    local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
     #print local
     #print remote
     send_to_remote_hosts(client, remote)

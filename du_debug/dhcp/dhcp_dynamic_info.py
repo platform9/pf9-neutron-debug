@@ -1,5 +1,5 @@
 import sys
-sys.path.append('../common/')
+sys.path.append('../../common/')
 
 import pdb
 import os
@@ -14,22 +14,13 @@ def create_dhcp_dict(vm_name, neutron):
     vm_port_dict = discovery.get_port_dict(vm_name, neutron)
     network_id = vm_port_dict['network_id']
     host_id = vm_port_dict['binding:host_id']
-
-    dhcp_ports = get_all_dhcp_ports(network_id, neutron)
+    dhcp_ports = discovery.get_all_dhcp_ports(network_id, neutron)
+    
     network_label = discovery.get_network_label(network_id, neutron)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
     local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label, neutron)
 
     return local_dhcp_dict, remote_dhcp_dict
-
-def get_all_dhcp_ports(vm_network_id, neutron):
-    dhcp_ports = []
-
-    for port in neutron.list_ports()['ports']:
-        if port['network_id'] == vm_network_id and port['device_owner'] == DHCP_OWNER:
-            dhcp_ports.append(port)
-
-    return dhcp_ports
 
 def differentiate_hosts(vm_host_id, dhcp_ports):
 
@@ -71,7 +62,7 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neu
 	#print "dhcp port"
 	#print port
         dhcp_bridge_name = discovery.get_bridge_name(network_label, dhcp_host_id, neutron)
-        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name, 
+        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name,
 		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'dhcp remote host':""})
     remote_dhcp_dict['dhcp remote hosts'] = dhcp_different_host
 
