@@ -113,7 +113,7 @@ def send_to_remote_hosts(client, remote):
 
 def local_host_recieve_message(client, dhcp_dict):
 
-    cctxt = client.prepare(server=CONF.host)
+    cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
     cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
 
 def remote_host_recieve_message(client, dhcp_dict):
