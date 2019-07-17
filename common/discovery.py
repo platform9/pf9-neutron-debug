@@ -3,6 +3,7 @@ import sys
 import requests
 
 VIF_PREFIX_LEN = 14
+DHCP_OWNER = 'network:dhcp'
 
 # DU Side
 def heartbeat_host(host_id, neutron):
@@ -11,15 +12,15 @@ def heartbeat_host(host_id, neutron):
     for host in r.json():
         if host_id == host['id']:
             if host['info']['responding'] == True:
-                return 1
-            else:
                 return 0
+            else:
+                return 1
 
-def heartbeat_port(port, neutron):
+def heartbeat_port(port):
     if port['status'] == 'ACTIVE':
-        return 1
-    else
         return 0
+    else:
+        return 1
 
 def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")

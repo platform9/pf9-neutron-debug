@@ -65,7 +65,7 @@ def main():
     error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
 
     if error_code:
-        sys.exit("Static Error detected -> VM, DHCP, or Host is down. Check /log/var/neutron_debug/static.log for specific error")
+        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/static.log for specific error")
 
     print "HEARTBEAT tests look OK, ready to move on"
 

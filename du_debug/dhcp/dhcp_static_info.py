@@ -22,7 +22,7 @@ def run_du_static_checks(vm_name, neutron):
 
     host_error_dict = dict()
     for dhcp_port in dhcp_ports:
-        dhcp_host_code = discovery.heartbeat_host(dhcp_port["'binding:host_id'"], neutron)
+        dhcp_host_code = discovery.heartbeat_host(dhcp_port['binding:host_id'], neutron)
         host_error_dict[dhcp_port['binding:host_id']] = dhcp_host_code
 
     dhcp_error_dict = dict()
@@ -39,21 +39,21 @@ def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
         logging.info("VM HOST is down, unable to run DHCP traffic tests")
         return 1
     if vm_code == 1:
-        logging.info("VM Instance is down, unable to run DHCP traffic tests")
+        logging.info("VM Port is down, unable to run DHCP traffic tests")
         return 1
 
     dhcp_host_error = 0
-    for id,code in host_error_dict:
+    for i_d,code in host_error_dict.items():
         if code == 1:
-            logging.info("DHCP HOST %s is down, unable to run DHCP traffic tests" % (id))
+            logging.info("DHCP HOST %s is down, unable to run DHCP traffic tests" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1
 
     dhcp_server_error = 0
-    for id,code in dhcp_error_dict:
+    for i_d,code in dhcp_error_dict.items():
         if code == 1:
-            logging.info("DHCP SERVER %s is down, unable to run DHCP traffic tests" % (id))
+            logging.info("DHCP SERVER Port %s is down, unable to run DHCP traffic tests" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1
