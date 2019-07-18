@@ -60,11 +60,8 @@ class ICMPEndpoint(object):
         self.server = server
 
     def init_icmp(self, ctx, icmp_d):
+	return
         
-
-
-
-
 
 def main():
 
