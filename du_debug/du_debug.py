@@ -34,7 +34,7 @@ class GetHostDataEndpoint(object):
     def __init__(self, server):
         self.server = server
         self.counter = 0
-        self.log_info = LogData()
+        self.log_info = log_data.LogData()
 
     def recieve_dhcp_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
