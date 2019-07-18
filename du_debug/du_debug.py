@@ -34,14 +34,17 @@ class GetHostDataEndpoint(object):
     def __init__(self, server):
         self.server = server
         self.counter = 0
+        self.log_info = log_data.LogData()
 
-    def get_dict(self, ctx, d):
+    def recieve_dhcp_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
-        log_data.log_data(d)
+        self.log_info.log_data(d)
         self.counter = self.counter + 1
         if self.counter == 2:
+            # DHCP analysis
+            #self.log_info.analyze()
             stop_thread = True
 
     def get_message(self, ctx, message):
@@ -126,12 +129,12 @@ def send_to_remote_hosts(client, remote):
 def local_host_recieve_message(client, dhcp_dict):
 
     cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
-    cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
+    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
 
 def remote_host_recieve_message(client, dhcp_dict):
 
     cctxt = client.prepare(server=dhcp_dict['host_id'])
-    cctxt.cast({}, 'get_dhcp_dict', dhcp_d = dhcp_dict)
+    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
 
 def get_remote_data(client, remote):
     for host in remote['dhcp remote hosts']:
