@@ -7,7 +7,7 @@ import init_neutron_client
 import discovery
 import logging
 
-logging.basicConfig(filename='/var/log/neutron_debug/static.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+logging.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
 def run_du_static_checks(vm_name, neutron):
 

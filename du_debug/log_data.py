@@ -2,7 +2,7 @@ import logging
 
 DHCP_SERVER_PREFIX = "DHCP SERVER "
 
-logging.basicConfig(filename='/var/log/neutron_debug/dhcp.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+logging.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
 def log_data(data_dict):
 

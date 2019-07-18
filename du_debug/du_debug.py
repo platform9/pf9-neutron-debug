@@ -82,10 +82,10 @@ def main():
     local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
 
     #dnsmasq
-    check_dnsmasq_process(client, local['vm_info'], local['vm_info']['host_id'])
+    check_dnsmasq_process(client, local['vm info'], local['vm info']['host_id'])
 
     for host in remote['dhcp remote hosts']:
-        check_dnsmasq_process(client, local['vm_info'], host['host_id'])
+        check_dnsmasq_process(client, local['vm info'], host['host_id'])
 
     #print local
     #print remote

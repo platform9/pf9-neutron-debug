@@ -47,7 +47,7 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neu
     vm_info['host_id'] = vm_port_dict['binding:host_id']
     vm_info['network_label'] = network_label
     vm_info['mac_address'] = vm_port_dict['mac_address']
-    vm_info['ip_address'] = vm_port_dict['ip_address']
+    vm_info['ip_address'] = vm_port_dict['fixed_ips'][0]['ip_address']
     vm_info['bridge_name'] = bridge_name
     local_dhcp_dict['vm info'] = vm_info
 
