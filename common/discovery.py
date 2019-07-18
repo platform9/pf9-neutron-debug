@@ -26,6 +26,13 @@ def vmname_parse(vm_name):
     vm_name = vm_name.replace("_", "-")
     return vm_name
 
+def get_dhcp_number(neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/services/neutron-server', headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    neutron_dict = r.json()
+    dhcp_per_network =  neutron_dict['neutron']['DEFAULT']['dhcp_agents_per_network']
+    return dhcp_per_network
+
 def get_all_dhcp_ports(vm_network_id, neutron):
     dhcp_ports = []
 
