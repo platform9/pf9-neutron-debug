@@ -47,9 +47,9 @@ class DHCPEndpoint(object):
         elif "dhcp remote host" in dhcp_d.keys():
 	   self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
 
-    def dnsmasq_check(self, ctx, dhcp_d):
+    def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
-        message = dnsmasq_checker.init_dnsmasq_check(dhcp_d)
+        message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
         message_to_du(message)
 
 

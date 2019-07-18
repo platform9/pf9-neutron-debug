@@ -1,9 +1,9 @@
 import os
 
 
-def init_dnsmasq_check(dhcp_dict):
+def init_dnsmasq_check(dhcp_dict, host_id):
     error_code = analyze_dnsmasq(dhcp_dict)
-    message = diagnose_dnsmasq(error_code, dhcp_dict)
+    message = diagnose_dnsmasq(error_code, host_id)
     return message
 
 def analyze_dnsmasq(dhcp_dict):
@@ -33,12 +33,12 @@ def analyze_dnsmasq(dhcp_dict):
 
     return 0
 
-def diagnose_dnsmasq(error_code, dhcp_dict):
+def diagnose_dnsmasq(error_code, host_id):
 
     if error_code == 0:
-        message = "CODE 0: Successfully identified dnsmasq process for host %s and found MAC and IP for source VM of interest in dnsmasq" % (dhcp_dict['host_id'])
+        message = "CODE 0: Successfully identified dnsmasq process for host %s and found MAC and IP for source VM of interest in dnsmasq" % (host_id)
     elif error_code == 1:
-        message = "CODE 1: No dnsmasq process exists for host %s" % (dhcp_dict['host_id'])
+        message = "CODE 1: No dnsmasq process exists for host %s" % (host_id)
     else:
-        message = "CODE 2: Successfully identified dnsmasq process for host %s, but not for source VM of interest" % (dhcp_dict['host_id'])
+        message = "CODE 2: Successfully identified dnsmasq process for host %s, but not for source VM of interest" % (host_id)
     return message

@@ -141,7 +141,7 @@ def get_remote_data(client, remote):
 def check_dnsmasq_process(client, dhcp_dict, host_id):
 
     cctxt = client.prepare(server=host_id)
-    cctxt.cast({}, 'dnsmasq_check', dhcp_d = dhcp_dict)
+    cctxt.cast({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
 
 
 if __name__ == '__main__':
