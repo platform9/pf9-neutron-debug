@@ -13,6 +13,7 @@ import dnsmasq_checker
 
 import scapy_driver
 import pcap_driver
+import set_listeners
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -22,7 +23,7 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
-class DHCPEndpoint(object):
+class CheckerEndpoint(object):
     import scapy_driver
     import pcap_driver
 
@@ -52,16 +53,20 @@ class DHCPEndpoint(object):
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
         message_to_du(message)
 
-class ICMPEndpoint(object):
+    def set_port_listeners(self, ctx, listener_dict):
 
-    target = oslo_messaging.Target(namespace='test', version='2.0')
+        self.listeners = set_listeners.init_listeners(listener_dict)
+        time.sleep(2)
 
-    def __init__(self, server):
-        self.server = server
+    def inject_icmp_packet(self, ctx, inject_dict):
 
-    def init_icmp(self, ctx, icmp_d):
-	return
-        
+        self.scapy.send_icmp_on_interface(inject_dict, inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], "vlan", inject_dict['payload'])
+        time.sleep(1)
+
+    def send_listener_data(self, ctx, listener_dict):
+
+        icmp_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_icmp_mt, listener_dict['tag'])
+        return_to_du(data)
 
 def main():
 
@@ -101,7 +106,7 @@ def create_server(conf, transport, target):
     """
     Create RPC server for handling messaging
     """
-    endpoints = [DHCPEndpoint(None)]
+    endpoints = [CheckerEndpoint(None)]
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
