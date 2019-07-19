@@ -58,7 +58,7 @@ def get_sniff_result(listeners,handler):
         vif_pre = listener.name
         data["remote host:" + vif_pre] = []
         for packet in listener.readpkts():
-            icmp_type = handler(str(packet[1]))
+            icmp_type, src, dst = handler(str(packet[1]))
             if icmp_type is not None:
-               data["remote host:" + vif_pre].append(icmp_type)
+               data["remote host:" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
     return data

@@ -13,6 +13,7 @@ import dnsmasq_checker
 
 import scapy_driver
 import pcap_driver
+import set_listeners
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -22,7 +23,7 @@ CONF = cfg.CONF
 logging.register_options(CONF)
 logging.set_defaults()
 
-class DHCPEndpoint(object):
+class CheckerEndpoint(object):
     import scapy_driver
     import pcap_driver
 
@@ -34,7 +35,7 @@ class DHCPEndpoint(object):
 	self.scapy = scapy_driver.ScapyDriver()
 
 
-    def get_remote_listener_data(self, ctx, remote):
+    def send_remote_listener_dhcp_data(self, ctx, remote):
         self.thread.join()
         dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
         dhcp_remote_data = dhcp_remote.merge_data(dhcp_remote_data, remote)
@@ -49,19 +50,26 @@ class DHCPEndpoint(object):
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
+	print "HERE"
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
-        message_to_du(message)
+	print "LOCAL HOST: " + message
+	return message
 
-class ICMPEndpoint(object):
 
-    target = oslo_messaging.Target(namespace='test', version='2.0')
+    def set_port_listeners(self, ctx, listener_dict):
 
-    def __init__(self, server):
-        self.server = server
+        self.listeners = set_listeners.init_listeners(listener_dict)
+        time.sleep(2)
 
-    def init_icmp(self, ctx, icmp_d):
-	return
-        
+    def inject_icmp_packet(self, ctx, inject_dict):
+
+        self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], "vlan", inject_dict['payload'])
+        time.sleep(1)
+
+    def send_listener_data(self, ctx, listener_dict):
+
+        icmp_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_icmp_mt, listener_dict['tag'])
+        return_to_du(icmp_data)
 
 def main():
 
@@ -79,18 +87,25 @@ def main():
 
     server = create_server(CONF, transport, target)
 
+    server.start()
+    server.stop()
+    server.wait()
+
     try:
+	server.reset()
         server.start()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stopping server")
+	server.stop()
+        server.wait()
+	print("Stopping server")
 
 
 def return_to_du(transport_json):
 
     client = oslo_messaging.RPCClient(transport, du_target)
-    client.cast({}, 'recieve_dhcp_dict', d=transport_json)
+    client.cast({}, 'recieve_dict', d=transport_json)
 
 def message_to_du(message):
 
@@ -101,7 +116,7 @@ def create_server(conf, transport, target):
     """
     Create RPC server for handling messaging
     """
-    endpoints = [DHCPEndpoint(None)]
+    endpoints = [CheckerEndpoint(None)]
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 

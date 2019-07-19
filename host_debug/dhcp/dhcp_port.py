@@ -31,6 +31,6 @@ def get_port_data(port_id, flag):
         message = dhcp_packet.options[0]
         icmp_type = DHCP_MESSATE_TYPE[message[1]]
         if icmp_type is not None:
-               data[flag + vif].append(icmp_type)
+               data[flag + vif].append([icmp_type, "src: %s" % p.src, "dst: %s" % p.dst])
 
     return data

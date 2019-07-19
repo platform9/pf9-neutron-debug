@@ -30,3 +30,6 @@ DHCP_NS_PREFIX = 'qdhcp-'
 
 # Reference: http://www.networksorcery.com/enp/rfc/rfc826.txt
 ARP_OP_TYPE = ['', 'REQUEST', 'REPLY']
+
+
+# TYPO
