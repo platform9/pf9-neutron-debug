@@ -60,13 +60,13 @@ class CheckerEndpoint(object):
 
     def inject_icmp_packet(self, ctx, inject_dict):
 
-        self.scapy.send_icmp_on_interface(inject_dict, inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], "vlan", inject_dict['payload'])
+        self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], "vlan", inject_dict['payload'])
         time.sleep(1)
 
     def send_listener_data(self, ctx, listener_dict):
 
         icmp_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_icmp_mt, listener_dict['tag'])
-        return_to_du(data)
+        return_to_du(icmp_data)
 
 def main():
 
