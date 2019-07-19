@@ -3,6 +3,7 @@
 import sys
 sys.path.append('../common/')
 sys.path.append('./dhcp/')
+sys.path.append('./icmp/')
 
 import time
 import oslo_messaging
@@ -41,7 +42,8 @@ class GetHostDataEndpoint(object):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
-        self.log_info.log_data(d)
+	#TODO Remember to uncomment to log data
+        #self.log_info.log_data(d)
         self.counter = self.counter + 1
         if self.counter == 2:
             # DHCP analysis
@@ -75,6 +77,7 @@ def main():
     client = oslo_messaging.RPCClient(transport, target)
     neutron = init_neutron_client.make_neutron_object()
 
+    #TODO: Don't forget to uncomment
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
@@ -83,6 +86,7 @@ def main():
     else:
         run_icmp_check(client, neutron)
 
+    #TODO: Don't forget to uncomment
     server_thread.join()
 
 
@@ -121,10 +125,12 @@ def run_icmp_check(client, neutron):
     dest_icmp_dict = icmp_info.get_dest_icmp_dict()
     inject_icmp_dict = icmp_info.get_inject_icmp_dict()
 
+    print "SOURCE ICMP DICT"
     print source_icmp_dict
+    print "DESTINATION ICMP DICT"
     print dest_icmp_dict
+    print "INJECT SOURCE ICMP DICT"
     print inject_icmp_dict
-    sys.exit()
 
     listen_on_host(client, source_icmp_dict)
     listen_on_host(client, dest_icmp_dict)
@@ -188,7 +194,7 @@ def listen_on_host(client, listen_dict):
 
 def source_inject(client, inject_dict):
 
-    cctxt = client.prepare(server=listen_dict['host_id'])
+    cctxt = client.prepare(server=inject_dict['host_id'])
     cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
 
 def retrieve_listener_data(client, listen_dict):

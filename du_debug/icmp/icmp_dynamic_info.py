@@ -17,9 +17,9 @@ class ICMPInfo:
         self.source_port_dict = discovery.get_port_dict(self.source_vm, self.neutron)
         self.dest_port_dict = discovery.get_port_dict(self.dest_vm, self.neutron)
 
-        self.network_id = source_port_dict['network_id']
-        self.source_host_id = source_port_dict['binding:host_id']
-        self.dest_host_id = dest_port_dict['binding:host_id']
+        self.network_id = self.source_port_dict['network_id']
+        self.source_host_id = self.source_port_dict['binding:host_id']
+        self.dest_host_id = self.dest_port_dict['binding:host_id']
         self.network_label = discovery.get_network_label(self.network_id, self.neutron)
 
         self.format_icmp_dicts()
@@ -29,7 +29,7 @@ class ICMPInfo:
     def format_icmp_dicts(self):
 
         self.source_icmp_listen_dict = self.format_source_dict()
-        self.dest_icmp_listen_dict = self.ormat_dest_dict()
+        self.dest_icmp_listen_dict = self.format_dest_dict()
         self.inject_icmp_dict = self.format_inject_dict()
 
     def format_source_dict(self):
@@ -48,11 +48,12 @@ class ICMPInfo:
         source_icmp_dict['vif_names'] = []
 
         vif_names = discovery.get_vif_names(source_icmp_dict['port_id'])
-        for vif_name in vif_names:
+        for port_type, vif_name in vif_names.items():
             vif = dict()
             vif[vif_name] = dict()
             vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
             vif[vif_name]['is_ns'] = "None"
+	    vif[vif_name]['port_type'] = port_type
             source_icmp_dict['vif_names'].append(vif)
 
         return source_icmp_dict
@@ -71,14 +72,15 @@ class ICMPInfo:
         dest_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
         dest_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.dest_host_id, self.neutron)
         dest_icmp_dict['tag'] = "destination"
-        source_icmp_dict['vif_names'] = []
+        dest_icmp_dict['vif_names'] = []
 
         vif_names = discovery.get_vif_names(dest_icmp_dict['port_id'])
-        for vif_name in vif_names:
+        for port_type, vif_name in vif_names.items():
             vif = dict()
             vif[vif_name] = dict()
             vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
             vif[vif_name]['is_ns'] = "None"
+	    vif[vif_name]['port_type'] = port_type
             dest_icmp_dict['vif_names'].append(vif)
 
         return dest_icmp_dict
@@ -88,7 +90,13 @@ class ICMPInfo:
         inject_icmp_dict = dict()
         inject_icmp_dict.update(self.source_icmp_listen_dict)
         inject_icmp_dict['payload'] = "abcd" * 3
-        inject_icmp_dict['inject_port'] = "qbr"
+
+	for vif in inject_icmp_dict['vif_names']:
+	    if "qbr" in vif.keys()[0]:
+		inject_port = vif.keys()[0]
+		break
+
+        inject_icmp_dict['inject_port'] = inject_port
 
         return inject_icmp_dict
 
