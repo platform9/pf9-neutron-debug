@@ -15,6 +15,7 @@ import icmp_dynamic_info
 import log_data
 import threading
 import logging as logs
+import pdb
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -42,8 +43,7 @@ class GetHostDataEndpoint(object):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
-	#TODO Remember to uncomment to log data
-        #self.log_info.log_data(d)
+        self.log_info.log_data(d)
         self.counter = self.counter + 1
         if self.counter == 2:
             # DHCP analysis
@@ -76,8 +76,12 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
     neutron = init_neutron_client.make_neutron_object()
-
-    #TODO: Don't forget to uncomment
+    '''
+    server.start()
+    server.stop()
+    server.wait()
+    sys.exit()
+    '''
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
@@ -86,30 +90,42 @@ def main():
     else:
         run_icmp_check(client, neutron)
 
-    #TODO: Don't forget to uncomment
     server_thread.join()
 
 
 def run_dhcp_process(client, neutron):
 
+    global stop_thread
     vm_name = sys.argv[1]
 
     error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
     if error_code:
-        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/static.log for specific error")
+	stop_thread = True
+        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
+    
     print "HEARTBEAT tests look OK, ready to move on"
 
     # DHCP Dict
     local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
     #dnsmasq
-    check_dnsmasq_process(client, local['vm info'], local['vm info']['host_id'])
+    message = check_dnsmasq_process(client, local['vm info'], local['vm info']['host_id'])
+    logs.info(message)
+    print message
+    if "CODE 1" in message or "CODE 2" in message:
+        stop_thread = True
+	sys.exit()	    
     for host in remote['dhcp remote hosts']:
-        check_dnsmasq_process(client, local['vm info'], host['host_id'])
+        message = check_dnsmasq_process(client, local['vm info'], host['host_id'])
+        logs.info(message)
+        print message
+	if "CODE 1" in message or "CODE 2" in message:
+            stop_thread = True
+	    sys.exit()	    
 
     send_to_remote_hosts(client, remote)
     time.sleep(2)
     local_host_recieve_message(client, local)
-    time.sleep(5)
+    time.sleep(7)
     get_remote_data(client, remote)
 
 
@@ -143,6 +159,7 @@ def run_icmp_check(client, neutron):
 
 def server_process(rpcserver):
     try:
+	rpcserver.reset()
         rpcserver.start()
 	print "Server Starting..."
         for i in range(0,35):
@@ -150,8 +167,11 @@ def server_process(rpcserver):
            if stop_thread:
 	      print("All done..Stopping Server")
               rpcserver.stop()
+	      rpcserver.wait()
 	      break
     except KeyboardInterrupt:
+        rpcserver.stop()
+	rpcserver.wait()
         print("Stopping server")
 
 def create_server(conf, transport, target):
@@ -185,7 +205,8 @@ def get_remote_data(client, remote):
 def check_dnsmasq_process(client, dhcp_dict, host_id):
 
     cctxt = client.prepare(server=host_id)
-    cctxt.cast({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
+    flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
+    return flag
 
 def listen_on_host(client, listen_dict):
 

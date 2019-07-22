@@ -20,10 +20,13 @@ class LogData:
         if 'local host' in data_dict.keys()[0]:
             self.log_data_to_file(data_dict, "LOCAL")
             self.local = data_dict
-        else:
+        elif 'remote host' in data_dict.keys()[0]:
             self.log_data_to_file(data_dict, "REMOTE")
             self.remote.append(data_dict)
-
+	elif 'source' in data_dict.keys()[0]:
+	    self.log_icmp_data_to_file(data_dict, "SOURCE")
+	elif 'destination' in data_dict.keys()[0]:
+	    self.log_icmp_data_to_file(data_dict, "DESTINATION")
 
     def log_data_to_file(self, data, flag):
         logging.info("DHCP PACKET LISTENER DATA - %s HOST" % flag)
@@ -34,6 +37,13 @@ class LogData:
             logging.info(prefix + "INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
         logging.info("")
         return
+
+    def log_icmp_data_to_file(self, data, flag):
+	logging.info("ICMP PACKET LISTENER DATA -  %s HOST" % flag)
+	for k,v in data.items():
+	    logging.info("INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
+	logging.info("")
+	return
 
     def analyze(self):
 
