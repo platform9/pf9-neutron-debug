@@ -50,8 +50,10 @@ class CheckerEndpoint(object):
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
+	print "HERE"
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
-        message_to_du(message)
+	print "LOCAL HOST: " + message
+	return message
 
     def set_port_listeners(self, ctx, listener_dict):
 
@@ -83,13 +85,21 @@ def main():
     du_target = oslo_messaging.Target(topic='myroutingkey', server="myserver", version='2.0', namespace='test')
 
     server = create_server(CONF, transport, target)
-
+    '''
+    server.start()
+    server.stop()
+    server.wait()
+    sys.exit()
+    '''
     try:
+	server.reset()
         server.start()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("Stopping server")
+	server.stop()
+        server.wait()
+	print("Stopping server")
 
 
 def return_to_du(transport_json):

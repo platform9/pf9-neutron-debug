@@ -60,7 +60,7 @@ def init_dhcp_check(dhcp_dict):
 
 def inject_packets(scapy, vif_names, src_mac):
     scapy.send_dhcp_over_qbr(vif_names['qbr'], src_mac)
-    time.sleep(1)
+    time.sleep(3)
 
 def get_sniff_result(listeners,handler):
     data = dict()
@@ -68,7 +68,7 @@ def get_sniff_result(listeners,handler):
         vif_pre = listener.name
         data["local host:" + vif_pre] = []
         for packet in listener.readpkts():
-            icmp_type = handler(str(packet[1]))
+            icmp_type, src, dst = handler(str(packet[1]))
             if icmp_type is not None:
-               data["local host:" + vif_pre].append(icmp_type)
+               data["local host:" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
     return data

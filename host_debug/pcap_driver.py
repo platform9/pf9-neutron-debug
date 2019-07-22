@@ -4,7 +4,7 @@ import constants
 
 class PcapDriver(object):
 
-    def setup_listener(self, iface, filter, timeout=5):
+    def setup_listener(self, iface, filter, timeout=10):
         listener = pcap.pcap(iface, timeout_ms=timeout * 1000)
         listener.setfilter(filter)
         listener.setnonblock(True)
