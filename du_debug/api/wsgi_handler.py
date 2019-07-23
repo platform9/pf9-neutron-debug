@@ -13,23 +13,15 @@ import icmp_dynamic_info
 import log_data
 import time
 
-APP_NAME = "confmgr"
-app = Flask(__name__)
-app.debug = True
-
-
 CONF = cfg.CONF
+app = Flask(__name__)
 
 neutron = init_neutron_client.make_neutron_object()
 
 
-@enforce(required=['admin'])
-@app.route('/v1/single/<string:vm_name>', methods=['GET'])
-def single_vm_checker(vm_name):
+#@app.route('/v1/single/<string:vm_name>', methods=['GET'])
+#def single_vm_checker(vm_name):
 
-
-
-@enforce(required=['admin'])
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
 
@@ -45,10 +37,15 @@ def paired_vms_checker(source_vm, dest_vm):
     print "INJECT SOURCE ICMP DICT"
     print inject_icmp_dict
 
-    du_debug.listen_on_host(source_icmp_dict)
-    du_debug.listen_on_host(dest_icmp_dict)
-    time.sleep(3)
-    du_debug.source_inject(inject_icmp_dict)
-    time.sleep(3)
-    du_debug.retrieve_listener_data(source_icmp_dict)
-    du_debug.retrieve_listener_data(dest_icmp_dict)
+    if request.method == 'GET':
+        du_debug.listen_on_host(source_icmp_dict)
+        du_debug.listen_on_host(dest_icmp_dict)
+        time.sleep(3)
+        du_debug.source_inject(inject_icmp_dict)
+        time.sleep(3)
+        du_debug.retrieve_listener_data(source_icmp_dict)
+        du_debug.retrieve_listener_data(dest_icmp_dict)
+
+
+def app_factory(global_config, **local_conf):
+    return app
