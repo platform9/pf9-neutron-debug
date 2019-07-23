@@ -39,7 +39,7 @@ class GetHostDataEndpoint(object):
         self.counter = 0
         self.log_info = log_data.LogData()
 
-    def recieve_dhcp_dict(self, ctx, d):
+    def recieve_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
@@ -76,24 +76,23 @@ def main():
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
     neutron = init_neutron_client.make_neutron_object()
-    '''
+
     server.start()
     server.stop()
     server.wait()
-    sys.exit()
-    '''
+
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
     if check_code == 1:
-        run_dhcp_process(client, neutron)
+        run_dhcp_check(client, neutron)
     else:
         run_icmp_check(client, neutron)
 
     server_thread.join()
 
 
-def run_dhcp_process(client, neutron):
+def run_dhcp_check(client, neutron):
 
     global stop_thread
     vm_name = sys.argv[1]
@@ -102,7 +101,7 @@ def run_dhcp_process(client, neutron):
     if error_code:
 	stop_thread = True
         sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
-    
+
     print "HEARTBEAT tests look OK, ready to move on"
 
     # DHCP Dict
@@ -113,20 +112,20 @@ def run_dhcp_process(client, neutron):
     print message
     if "CODE 1" in message or "CODE 2" in message:
         stop_thread = True
-	sys.exit()	    
+	sys.exit()
     for host in remote['dhcp remote hosts']:
         message = check_dnsmasq_process(client, local['vm info'], host['host_id'])
         logs.info(message)
         print message
 	if "CODE 1" in message or "CODE 2" in message:
             stop_thread = True
-	    sys.exit()	    
+	    sys.exit()
 
-    send_to_remote_hosts(client, remote)
+    send_dhcp_to_remote_hosts(client, remote)
     time.sleep(2)
-    local_host_recieve_message(client, local)
+    local_host_recieve_dhcp_message(client, local)
     time.sleep(7)
-    get_remote_data(client, remote)
+    retrieve_remote_dhcp_data(client, remote)
 
 
 
@@ -182,44 +181,41 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-# RPC Message Functions
-def send_to_remote_hosts(client, remote):
+
+# DHCP RPC Message Functions
+def send_dhcp_to_remote_hosts(client, remote):
     for host in remote['dhcp remote hosts']:
-        remote_host_recieve_message(client, host)
+        remote_host_recieve_dhcp_message(client, host)
 
-def local_host_recieve_message(client, dhcp_dict):
-
-    cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
-    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
-
-def remote_host_recieve_message(client, dhcp_dict):
-
+def remote_host_recieve_dhcp_message(client, dhcp_dict):
     cctxt = client.prepare(server=dhcp_dict['host_id'])
     cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
 
-def get_remote_data(client, remote):
+def local_host_recieve_dhcp_message(client, dhcp_dict):
+    cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
+    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
+
+def retrieve_remote_dhcp_data(client, remote):
     for host in remote['dhcp remote hosts']:
         cctxt = client.prepare(server=host['host_id'])
-        cctxt.cast({}, 'get_remote_listener_data', remote=host)
+        cctxt.cast({}, 'send_remote_listener_dhcp_data', remote=host)
 
 def check_dnsmasq_process(client, dhcp_dict, host_id):
-
     cctxt = client.prepare(server=host_id)
     flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
     return flag
 
-def listen_on_host(client, listen_dict):
 
+# RPC Message - All other checkers
+def listen_on_host(client, listen_dict):
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
 
 def source_inject(client, inject_dict):
-
     cctxt = client.prepare(server=inject_dict['host_id'])
     cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
 
 def retrieve_listener_data(client, listen_dict):
-
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
 

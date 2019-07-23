@@ -35,7 +35,7 @@ class CheckerEndpoint(object):
 	self.scapy = scapy_driver.ScapyDriver()
 
 
-    def get_remote_listener_data(self, ctx, remote):
+    def send_remote_listener_dhcp_data(self, ctx, remote):
         self.thread.join()
         dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
         dhcp_remote_data = dhcp_remote.merge_data(dhcp_remote_data, remote)
@@ -54,6 +54,7 @@ class CheckerEndpoint(object):
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
 	print "LOCAL HOST: " + message
 	return message
+
 
     def set_port_listeners(self, ctx, listener_dict):
 
@@ -85,12 +86,11 @@ def main():
     du_target = oslo_messaging.Target(topic='myroutingkey', server="myserver", version='2.0', namespace='test')
 
     server = create_server(CONF, transport, target)
-    '''
+
     server.start()
     server.stop()
     server.wait()
-    sys.exit()
-    '''
+
     try:
 	server.reset()
         server.start()
@@ -105,7 +105,7 @@ def main():
 def return_to_du(transport_json):
 
     client = oslo_messaging.RPCClient(transport, du_target)
-    client.cast({}, 'recieve_dhcp_dict', d=transport_json)
+    client.cast({}, 'recieve_dict', d=transport_json)
 
 def message_to_du(message):
 
