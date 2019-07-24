@@ -70,23 +70,8 @@ class GetHostDataEndpoint(object):
 
 
 def main():
-    #opts = [cfg.StrOpt('host')]
-    #CONF.register_opts(opts)
 
     stop_thread = False
-
-
-    #CONF.register_cli_opts(cli_opts)
-    #CONF.register_opts(paste_opts)
-
-    '''
-    if len(sys.argv) > 4:
-        check_code = 2
-        CONF(sys.argv[3:])
-    else:
-        check_code = 1
-        CONF(sys.argv[2:])
-    '''
 
     CONF(sys.argv[1:])
 
@@ -94,8 +79,6 @@ def main():
     transport = oslo_messaging.get_transport(CONF)
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
     server = create_server(CONF, transport, target)
-    #client = oslo_messaging.RPCClient(transport, target)
-    #neutron = init_neutron_client.make_neutron_object()
 
     server.start()
     server.stop()
@@ -104,18 +87,7 @@ def main():
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.start()
 
-    # Addition
     start_wsgi_server()
-
-    # Subtraction
-    '''
-    if check_code == 1:
-        run_dhcp_check(client, neutron)
-    else:
-        run_icmp_check(client, neutron)
-
-    server_thread.join()
-    '''
 
 def start_wsgi_server():
 
@@ -160,34 +132,6 @@ def run_dhcp_check(client, neutron):
     retrieve_remote_dhcp_data(client, remote)
 
 
-
-def run_icmp_check(client, neutron):
-
-    src_vm_name = sys.argv[1]
-    dest_vm_name = sys.argv[2]
-
-
-    icmp_info = icmp_dynamic_info.ICMPInfo(src_vm_name, dest_vm_name, neutron)
-    source_icmp_dict = icmp_info.get_source_icmp_dict()
-    dest_icmp_dict = icmp_info.get_dest_icmp_dict()
-    inject_icmp_dict = icmp_info.get_inject_icmp_dict()
-
-    print "SOURCE ICMP DICT"
-    print source_icmp_dict
-    print "DESTINATION ICMP DICT"
-    print dest_icmp_dict
-    print "INJECT SOURCE ICMP DICT"
-    print inject_icmp_dict
-
-    listen_on_host(client, source_icmp_dict)
-    listen_on_host(client, dest_icmp_dict)
-    time.sleep(3)
-    source_inject(client, inject_icmp_dict)
-    time.sleep(3)
-    retrieve_listener_data(client, source_icmp_dict)
-    retrieve_listener_data(client, dest_icmp_dict)
-
-
 def server_process(rpcserver):
     try:
 	rpcserver.reset()
@@ -214,7 +158,7 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-
+'''
 # DHCP RPC Message Functions
 def send_dhcp_to_remote_hosts(client, remote):
     for host in remote['dhcp remote hosts']:
@@ -237,37 +181,6 @@ def check_dnsmasq_process(client, dhcp_dict, host_id):
     cctxt = client.prepare(server=host_id)
     flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
     return flag
-
-
-# RPC Message - All other checkers
-def listen_on_host(listen_dict):
-    client = oslo_messaging.RPCClient(transport, target)
-    cctxt = client.prepare(server=listen_dict['host_id'])
-    cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
-
-def source_inject(inject_dict):
-    client = oslo_messaging.RPCClient(transport, target)
-    cctxt = client.prepare(server=inject_dict['host_id'])
-    cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
-
-def retrieve_listener_data(listen_dict):
-    client = oslo_messaging.RPCClient(transport, target)
-    cctxt = client.prepare(server=listen_dict['host_id'])
-    cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
-
-
-'''
-def listen_on_host(client, listen_dict):
-    cctxt = client.prepare(server=listen_dict['host_id'])
-    cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
-
-def source_inject(client, inject_dict):
-    cctxt = client.prepare(server=inject_dict['host_id'])
-    cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
-
-def retrieve_listener_data(client, listen_dict):
-    cctxt = client.prepare(server=listen_dict['host_id'])
-    cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
 '''
 
 if __name__ == '__main__':

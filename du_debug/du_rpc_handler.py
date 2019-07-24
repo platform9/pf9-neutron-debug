@@ -25,7 +25,30 @@ class RPCClientObject:
     def get_rpc_client(self):
         return self.client
 
+    # DHCP RPC Message Functions
+    def send_dhcp_to_remote_hosts(self, remote):
+        for host in remote['dhcp remote hosts']:
+            self.remote_host_recieve_dhcp_message(host)
 
+    def remote_host_recieve_dhcp_message(self, dhcp_dict):
+        cctxt = self.client.prepare(server=dhcp_dict['host_id'])
+        cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
+
+    def local_host_recieve_dhcp_message(self, dhcp_dict):
+        cctxt = self.client.prepare(server=dhcp_dict['vm info']['host_id'])
+        cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
+
+    def retrieve_remote_dhcp_data(self, remote):
+        for host in remote['dhcp remote hosts']:
+            cctxt = self.client.prepare(server=host['host_id'])
+            cctxt.cast({}, 'send_remote_listener_dhcp_data', remote=host)
+
+    def check_dnsmasq_process(self, dhcp_dict, host_id):
+        cctxt = self.client.prepare(server=host_id)
+        flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
+        return flag
+
+    # ALl other RPC functions
     def listen_on_host(self, listen_dict):
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])
