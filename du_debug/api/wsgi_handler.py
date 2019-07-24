@@ -51,8 +51,8 @@ def single_vm_checker(vm_name):
         logs.info(message)
         print message
 	if "CODE 1" in message or "CODE 2" in message:
-        stop_thread = True
-        sys.exit()
+            stop_thread = True
+            sys.exit()
 
     if request.method == 'GET':
         client_obj.send_dhcp_to_remote_hosts(remote)

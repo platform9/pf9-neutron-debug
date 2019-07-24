@@ -137,8 +137,8 @@ def server_process(rpcserver):
 	rpcserver.reset()
         rpcserver.start()
 	print "Server Starting..."
-        for i in range(0,35):
-        #while True:
+        #for i in range(0,35):
+        while True:
            time.sleep(1)
            if stop_thread:
 	      print("All done..Stopping Server")
