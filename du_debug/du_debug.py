@@ -18,6 +18,7 @@ import threading
 import logging as logs
 import pdb
 
+from eventlet import wsgi
 from oslo_config import cfg
 from oslo_log import log as logging
 from multiprocessing import Pool
@@ -26,17 +27,18 @@ from paste.deploy import loadapp
 CONF = cfg.CONF
 
 cli_opts = [
-    cfg.StrOpt('paste_ini',default='/api/api-paste.ini')
+    cfg.StrOpt('paste_ini',default='/home/pranav/pf9-neutron-debug/du_debug/api/api-paste.ini')
 ]
 paste_opts = [
     cfg.IntOpt('listen_port', default=8330)
 ]
-CONF.register_cli_opts(cli_opts)
-CONF.register_opts(paste_opts)
 
-logging.register_options(CONF)
-logging.set_defaults()
-LOG = logging.getLogger(__name__)
+#CONF.register_cli_opts(cli_opts)
+#CONF.register_opts(paste_opts)
+
+#logging.register_options(CONF)
+#logging.set_defaults()
+#LOG = logging.getLogger(__name__)
 
 
 stop_thread = False
@@ -69,10 +71,14 @@ class GetHostDataEndpoint(object):
 
 
 def main():
-    opts = [cfg.StrOpt('host')]
-    CONF.register_opts(opts)
+    #opts = [cfg.StrOpt('host')]
+    #CONF.register_opts(opts)
 
     stop_thread = False
+
+    
+    CONF.register_cli_opts(cli_opts)
+    CONF.register_opts(paste_opts)
 
     '''
     if len(sys.argv) > 4:
@@ -86,11 +92,12 @@ def main():
     CONF(sys.argv[1:])
 
     oslo_messaging.set_transport_defaults('myexchange')
+
+    global transport
+    global target    
+
     transport = oslo_messaging.get_transport(CONF)
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
-    global server
-    global client
-    global neutron
     server = create_server(CONF, transport, target)
     client = oslo_messaging.RPCClient(transport, target)
     neutron = init_neutron_client.make_neutron_object()
@@ -117,8 +124,9 @@ def main():
 
 def start_wsgi_server():
 
+    pdb.set_trace()
     paste_file = CONF.paste_ini
-    wsgi_app = loadapp('config:%s' % paste_file, 'main')
+    wsgi_app = loadapp('config:%s' % paste_file, "main")
     listen_port = CONF.listen_port
     wsgi.server(eventlet.listen(('', listen_port)), wsgi_app)
 
@@ -191,8 +199,8 @@ def server_process(rpcserver):
 	rpcserver.reset()
         rpcserver.start()
 	print "Server Starting..."
-        #for i in range(0,35):
-        while True:
+        for i in range(0,35):
+        #while True:
            time.sleep(1)
            if stop_thread:
 	      print("All done..Stopping Server")
@@ -239,22 +247,22 @@ def check_dnsmasq_process(client, dhcp_dict, host_id):
 
 # RPC Message - All other checkers
 def listen_on_host(listen_dict):
-    global client
+    client = oslo_messaging.RPCClient(transport, target)
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
 
 def source_inject(inject_dict):
-    global client
+    client = oslo_messaging.RPCClient(transport, target)
     cctxt = client.prepare(server=inject_dict['host_id'])
     cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
 
 def retrieve_listener_data(listen_dict):
-    global client
+    client = oslo_messaging.RPCClient(transport, target)
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
 
 
-
+'''
 def listen_on_host(client, listen_dict):
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
@@ -266,7 +274,7 @@ def source_inject(client, inject_dict):
 def retrieve_listener_data(client, listen_dict):
     cctxt = client.prepare(server=listen_dict['host_id'])
     cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
-
+'''
 
 if __name__ == '__main__':
     main()
