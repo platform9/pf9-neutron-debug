@@ -21,7 +21,6 @@ import pdb
 from eventlet import wsgi
 from oslo_config import cfg
 from oslo_log import log as logging
-from multiprocessing import Pool
 from paste.deploy import loadapp
 
 CONF = cfg.CONF
@@ -33,12 +32,12 @@ paste_opts = [
     cfg.IntOpt('listen_port', default=8330)
 ]
 
-#CONF.register_cli_opts(cli_opts)
-#CONF.register_opts(paste_opts)
+CONF.register_cli_opts(cli_opts)
+CONF.register_opts(paste_opts)
 
-#logging.register_options(CONF)
-#logging.set_defaults()
-#LOG = logging.getLogger(__name__)
+logging.register_options(CONF)
+logging.set_defaults()
+LOG = logging.getLogger(__name__)
 
 
 stop_thread = False
@@ -76,9 +75,9 @@ def main():
 
     stop_thread = False
 
-    
-    CONF.register_cli_opts(cli_opts)
-    CONF.register_opts(paste_opts)
+
+    #CONF.register_cli_opts(cli_opts)
+    #CONF.register_opts(paste_opts)
 
     '''
     if len(sys.argv) > 4:
@@ -92,15 +91,11 @@ def main():
     CONF(sys.argv[1:])
 
     oslo_messaging.set_transport_defaults('myexchange')
-
-    global transport
-    global target    
-
     transport = oslo_messaging.get_transport(CONF)
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
     server = create_server(CONF, transport, target)
-    client = oslo_messaging.RPCClient(transport, target)
-    neutron = init_neutron_client.make_neutron_object()
+    #client = oslo_messaging.RPCClient(transport, target)
+    #neutron = init_neutron_client.make_neutron_object()
 
     server.start()
     server.stop()
