@@ -9,10 +9,6 @@ sys.path.append('./api')
 import time
 import oslo_messaging
 import eventlet
-import init_neutron_client
-import dhcp_dynamic_info
-import dhcp_static_info
-import icmp_dynamic_info
 import log_data
 import threading
 import logging as logs
@@ -95,42 +91,6 @@ def start_wsgi_server():
     wsgi_app = loadapp('config:%s' % paste_file, "main")
     listen_port = CONF.listen_port
     wsgi.server(eventlet.listen(('', listen_port)), wsgi_app)
-
-def run_dhcp_check(client, neutron):
-
-    global stop_thread
-    vm_name = sys.argv[1]
-
-    error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
-    if error_code:
-	stop_thread = True
-        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
-
-    print "HEARTBEAT tests look OK, ready to move on"
-
-    # DHCP Dict
-    local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
-    #dnsmasq
-    message = check_dnsmasq_process(client, local['vm info'], local['vm info']['host_id'])
-    logs.info(message)
-    print message
-    if "CODE 1" in message or "CODE 2" in message:
-        stop_thread = True
-	sys.exit()
-    for host in remote['dhcp remote hosts']:
-        message = check_dnsmasq_process(client, local['vm info'], host['host_id'])
-        logs.info(message)
-        print message
-	if "CODE 1" in message or "CODE 2" in message:
-            stop_thread = True
-	    sys.exit()
-
-    send_dhcp_to_remote_hosts(client, remote)
-    time.sleep(2)
-    local_host_recieve_dhcp_message(client, local)
-    time.sleep(7)
-    retrieve_remote_dhcp_data(client, remote)
-
 
 def server_process(rpcserver):
     try:

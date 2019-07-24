@@ -26,7 +26,7 @@ oslo_messaging.set_transport_defaults('myexchange')
 @app.route('/v1/single/<string:vm_name>', methods=['GET'])
 def single_vm_checker(vm_name):
 
-    #global stop_thread
+    ## TODO: global stop_thread
 
     error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
     if error_code:
