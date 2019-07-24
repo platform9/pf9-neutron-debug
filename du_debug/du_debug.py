@@ -119,7 +119,6 @@ def main():
 
 def start_wsgi_server():
 
-    pdb.set_trace()
     paste_file = CONF.paste_ini
     wsgi_app = loadapp('config:%s' % paste_file, "main")
     listen_port = CONF.listen_port
