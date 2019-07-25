@@ -5,6 +5,7 @@ sys.path.append('../common/')
 sys.path.append('./dhcp/')
 sys.path.append('./icmp/')
 sys.path.append('./api')
+sys.path.append('./arp')
 
 import time
 import oslo_messaging
@@ -35,39 +36,24 @@ logging.register_options(CONF)
 logging.set_defaults()
 LOG = logging.getLogger(__name__)
 
-
-stop_thread = False
-
 # Return Endpoint
 class GetHostDataEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
 
     def __init__(self, server):
         self.server = server
-        self.counter = 0
-        self.log_info = log_data.LogData()
+	self.log_info = log_data.LogData()
 
     def recieve_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
-        global stop_thread
         self.log_info.log_data(d)
-        self.counter = self.counter + 1
-        if self.counter == 2:
-            # DHCP analysis
-            #self.log_info.analyze()
-            stop_thread = True
 
     def get_message(self, ctx, message):
         logs.info(message)
         print message
-        if "CODE 0" in message or "CODE 1" in message:
-            stop_thread = True
-
 
 def main():
-
-    stop_thread = False
 
     CONF(sys.argv[1:])
 
@@ -81,6 +67,7 @@ def main():
     server.wait()
 
     server_thread = threading.Thread(target=server_process, args=(server,))
+    server_thread.daemon = True
     server_thread.start()
 
     start_wsgi_server()
@@ -97,14 +84,8 @@ def server_process(rpcserver):
 	rpcserver.reset()
         rpcserver.start()
 	print "Server Starting..."
-        #for i in range(0,35):
         while True:
            time.sleep(1)
-           if stop_thread:
-	      print("All done..Stopping Server")
-              rpcserver.stop()
-	      rpcserver.wait()
-	      break
     except KeyboardInterrupt:
         rpcserver.stop()
 	rpcserver.wait()
@@ -118,30 +99,6 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-'''
-# DHCP RPC Message Functions
-def send_dhcp_to_remote_hosts(client, remote):
-    for host in remote['dhcp remote hosts']:
-        remote_host_recieve_dhcp_message(client, host)
-
-def remote_host_recieve_dhcp_message(client, dhcp_dict):
-    cctxt = client.prepare(server=dhcp_dict['host_id'])
-    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
-
-def local_host_recieve_dhcp_message(client, dhcp_dict):
-    cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
-    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
-
-def retrieve_remote_dhcp_data(client, remote):
-    for host in remote['dhcp remote hosts']:
-        cctxt = client.prepare(server=host['host_id'])
-        cctxt.cast({}, 'send_remote_listener_dhcp_data', remote=host)
-
-def check_dnsmasq_process(client, dhcp_dict, host_id):
-    cctxt = client.prepare(server=host_id)
-    flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
-    return flag
-'''
 
 if __name__ == '__main__':
     main()

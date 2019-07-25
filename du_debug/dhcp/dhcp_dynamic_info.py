@@ -17,8 +17,9 @@ def create_dhcp_dict(vm_name, neutron):
     dhcp_ports = discovery.get_all_dhcp_ports(network_id, neutron)
 
     network_label = discovery.get_network_label(network_id, neutron)
+    network_type = discovery.get_network_type(network_id, neutron)
     dhcp_same_host, dhcp_different_host = differentiate_hosts(host_id, dhcp_ports)
-    local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label, neutron)
+    local_dhcp_dict, remote_dhcp_dict = format_dhcp_dict(vm_port_dict, dhcp_same_host, dhcp_different_host, network_label, network_type, neutron)
 
     return local_dhcp_dict, remote_dhcp_dict
 
@@ -35,20 +36,30 @@ def differentiate_hosts(vm_host_id, dhcp_ports):
 
     return same_host, different_host
 
-def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neutron):
+def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, network_type, neutron):
 
     bridge_name = discovery.get_bridge_name(network_label, vm_port_dict['binding:host_id'], neutron)
+    tunnel_ip = discovery.get_tunnel_ip(vm_port_dict['binding:host_id'], neutron)
 
     local_dhcp_dict = {}
     vm_info = {}
     vm_info['network_id'] = vm_port_dict['network_id']
+    vm_info['checker_type'] = "DHCP"
     vm_info['port_id'] = vm_port_dict['id']
     vm_info['device_id'] = vm_port_dict['device_id']
     vm_info['host_id'] = vm_port_dict['binding:host_id']
+    vm_info['network_type'] = network_type
     vm_info['network_label'] = network_label
     vm_info['mac_address'] = vm_port_dict['mac_address']
     vm_info['ip_address'] = vm_port_dict['fixed_ips'][0]['ip_address']
+    vm_info['tunnel_ip'] = tunnel_ip
     vm_info['bridge_name'] = bridge_name
+
+    if network_type == "vxlan":
+        vm_info['tunnel_port'] = discovery.get_tunnel_port(vm_info['host_id'], tunnel_ip, neutron)
+    else:
+        vm_info['tunnel_port'] = "None"
+
     local_dhcp_dict['vm info'] = vm_info
 
     dhcp_same_host = []
@@ -61,9 +72,18 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, neu
     for port in different_host:
         dhcp_host_id = port['binding:host_id']
         dhcp_bridge_name = discovery.get_bridge_name(network_label, dhcp_host_id, neutron)
-        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name,
-		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'dhcp remote host':""})
+        tunnel_ip = discovery.get_tunnel_ip(dhcp_host_id, neutron)
+        if network_type == "vxlan":
+            tunnel_port = discovery.get_tunnel_port(dhcp_host_id, tunnel_ip, neutron)
+        else:
+            tunnel_port = "None"
+        dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_type':network_type, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name,
+		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'tunnel_ip':tunnel_ip, 'tunnel_port':tunnel_port, 'checker_type':"DHCP", 'dhcp remote host':""})
     remote_dhcp_dict['dhcp remote hosts'] = dhcp_different_host
+
+    local_dhcp_dict['remote hosts'] = []
+    for host in remote_dhcp_dict['dhcp remote hosts']:
+        local_dhcp_dict['remote hosts'].append({'host_id':host['host_id'], 'tunnel_ip':host['tunnel_ip']})
 
     return local_dhcp_dict, remote_dhcp_dict
 

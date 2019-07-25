@@ -17,7 +17,9 @@ class LogData:
 
     def log_data(self, data_dict):
 
-        if 'local host' in data_dict.keys()[0]:
+	if 'arp' in data_dict.keys()[0]:
+	    self.log_arp_data_to_file(data_dict, "SOURCE")
+        elif 'local host' in data_dict.keys()[0]:
             self.log_data_to_file(data_dict, "LOCAL")
             self.local = data_dict
         elif 'remote host' in data_dict.keys()[0]:
@@ -40,6 +42,13 @@ class LogData:
 
     def log_icmp_data_to_file(self, data, flag):
 	logging.info("ICMP PACKET LISTENER DATA -  %s HOST" % flag)
+	for k,v in data.items():
+	    logging.info("INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
+	logging.info("")
+	return
+    
+    def log_arp_data_to_file(self, data, flag):
+	logging.info("VXLAN ARP PACKET LISTENER DATA -  %s HOST" % flag)
 	for k,v in data.items():
 	    logging.info("INTERFACE: " + str(k.split(":")[1]) + "   " + "PACKET DATA: " + str(v))
 	logging.info("")

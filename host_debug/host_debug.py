@@ -9,6 +9,7 @@ import oslo_messaging
 import eventlet
 import dhcp_local
 import dhcp_remote
+import dhcp_port
 import dnsmasq_checker
 
 import scapy_driver
@@ -36,21 +37,21 @@ class CheckerEndpoint(object):
 
 
     def send_remote_listener_dhcp_data(self, ctx, remote):
-        self.thread.join()
-        dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
-        dhcp_remote_data = dhcp_remote.merge_data(dhcp_remote_data, remote)
-        return_to_du(dhcp_remote_data)
+        dhcp_remote_data = self.dhcp_remote_obj.collect_data()
+        log_to_du(dhcp_remote_data)
+        return dhcp_remote_data
 
     def init_dhcp(self, ctx, dhcp_d):
 	if "dhcp local host" in dhcp_d.keys():
 	   self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
-           return_to_du(self.dhcp_local_data)
+           log_to_du(self.dhcp_local_data)
+           return self.dhcp_local_data
         elif "dhcp remote host" in dhcp_d.keys():
-	   self.listeners, self.thread = dhcp_remote.init_dhcp_check(dhcp_d)
+	   self.dhcp_remote_obj = dhcp_remote.DHCPRemote(dhcp_d)
+	   self.dhcp_remote_obj.init_dhcp_check()
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
-	print "HERE"
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
 	print "LOCAL HOST: " + message
 	return message
@@ -58,18 +59,25 @@ class CheckerEndpoint(object):
 
     def set_port_listeners(self, ctx, listener_dict):
 
-        self.listeners = set_listeners.init_listeners(listener_dict)
+        self.set_listen_obj = set_listeners.SetListener(listener_dict)
+        self.set_listen_obj.init_listeners()
         time.sleep(2)
 
     def inject_icmp_packet(self, ctx, inject_dict):
 
-        self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], "vlan", inject_dict['payload'])
+        self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], inject_dict['payload'])
+        time.sleep(1)
+
+    def inject_arp_packet(self, ctx, inject_dict):
+
+        self.scapy.send_arp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'])
         time.sleep(1)
 
     def send_listener_data(self, ctx, listener_dict):
 
-        icmp_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_icmp_mt, listener_dict['tag'])
-        return_to_du(icmp_data)
+        checker_data = self.set_listen_obj.collect_data()
+        log_to_du(checker_data)
+        return checker_data
 
 def main():
 
@@ -102,7 +110,7 @@ def main():
 	print("Stopping server")
 
 
-def return_to_du(transport_json):
+def log_to_du(transport_json):
 
     client = oslo_messaging.RPCClient(transport, du_target)
     client.cast({}, 'recieve_dict', d=transport_json)

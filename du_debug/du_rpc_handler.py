@@ -34,19 +34,26 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=dhcp_dict['host_id'])
         cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
 
+
     def local_host_recieve_dhcp_message(self, dhcp_dict):
         cctxt = self.client.prepare(server=dhcp_dict['vm info']['host_id'])
-        cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
+        local_dhcp_response = cctxt.call({}, 'init_dhcp', dhcp_d = dhcp_dict)
+        return local_dhcp_response
 
     def retrieve_remote_dhcp_data(self, remote):
+        response_list = []
         for host in remote['dhcp remote hosts']:
             cctxt = self.client.prepare(server=host['host_id'])
-            cctxt.cast({}, 'send_remote_listener_dhcp_data', remote=host)
+            dhcp_response = cctxt.call({}, 'send_remote_listener_dhcp_data', remote=host)
+            response_list.append(dhcp_response)
+        return response_list
 
     def check_dnsmasq_process(self, dhcp_dict, host_id):
         cctxt = self.client.prepare(server=host_id)
         flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
         return flag
+
+
 
     # ALl other RPC functions
     def listen_on_host(self, listen_dict):
@@ -54,12 +61,18 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=listen_dict['host_id'])
         cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
 
-    def source_inject(self, inject_dict):
+    def source_icmp_inject(self, inject_dict):
 
         cctxt = self.client.prepare(server=inject_dict['host_id'])
         cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
 
+    def source_arp_inject(self, inject_dict):
+
+        cctxt = self.client.prepare(server=inject_dict['host_id'])
+        cctxt.cast({}, 'inject_arp_packet', inject_dict = inject_dict)
+
     def retrieve_listener_data(self, listen_dict):
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])
-        cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
+        response_dict = cctxt.call({}, 'send_listener_data', listener_dict = listen_dict)
+        return response_dict

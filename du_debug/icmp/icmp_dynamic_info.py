@@ -21,6 +21,7 @@ class ICMPInfo:
         self.source_host_id = self.source_port_dict['binding:host_id']
         self.dest_host_id = self.dest_port_dict['binding:host_id']
         self.network_label = discovery.get_network_label(self.network_id, self.neutron)
+        self.network_type = discovery.get_network_type(self.network_id, self.neutron)
 
         self.format_icmp_dicts()
 
@@ -34,6 +35,7 @@ class ICMPInfo:
 
     def format_source_dict(self):
         source_icmp_dict = dict()
+        source_icmp_dict['checker_type'] = "ICMP"
         source_icmp_dict['vm_name'] = self.source_vm
         source_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         source_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -42,10 +44,20 @@ class ICMPInfo:
         source_icmp_dict['host_id'] = self.source_host_id
         source_icmp_dict['port_id'] = self.source_port_dict['id']
         source_icmp_dict['network_label'] = self.network_label
-        source_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
+        source_icmp_dict['network_type'] = self.network_type
+        source_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
         source_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
         source_icmp_dict['tag'] = "source"
         source_icmp_dict['vif_names'] = []
+
+        tunnel_ip = discovery.get_tunnel_ip(self.source_host_id, self.neutron)
+        source_icmp_dict['tunnel_ip'] = tunnel_ip
+        source_icmp_dict['vxlan_filter'] = "(src %s or dst %s) and udp port (4789)" % (source_icmp_dict['tunnel_ip'], source_icmp_dict['tunnel_ip'])
+
+        if source_icmp_dict['network_type'] == "vxlan":
+            source_icmp_dict['tunnel_port'] = discovery.get_tunnel_port(self.source_host_id, source_icmp_dict['tunnel_ip'], self.neutron)
+        else:
+            source_icmp_dict['tunnel_port'] = "None"
 
         vif_names = discovery.get_vif_names(source_icmp_dict['port_id'])
         for port_type, vif_name in vif_names.items():
@@ -61,6 +73,7 @@ class ICMPInfo:
     def format_dest_dict(self):
 
         dest_icmp_dict = dict()
+        dest_icmp_dict['checker_type'] = "ICMP"
         dest_icmp_dict['vm_name'] = self.dest_vm
         dest_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         dest_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -69,10 +82,20 @@ class ICMPInfo:
         dest_icmp_dict['host_id'] = self.dest_host_id
         dest_icmp_dict['port_id'] = self.dest_port_dict['id']
         dest_icmp_dict['network_label'] = self.network_label
-        dest_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
+        dest_icmp_dict['network_type'] = self.network_type
+        dest_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
         dest_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.dest_host_id, self.neutron)
         dest_icmp_dict['tag'] = "destination"
         dest_icmp_dict['vif_names'] = []
+
+        tunnel_ip = discovery.get_tunnel_ip(self.dest_host_id, self.neutron)
+        dest_icmp_dict['tunnel_ip'] = tunnel_ip
+        dest_icmp_dict['vxlan_filter'] = "(src %s or dst %s) and udp port (4789)" % (dest_icmp_dict['tunnel_ip'], dest_icmp_dict['tunnel_ip'])
+
+        if dest_icmp_dict['network_type'] == "vxlan":
+            dest_icmp_dict['tunnel_port'] = discovery.get_tunnel_port(self.dest_host_id, dest_icmp_dict['tunnel_ip'], self.neutron)
+        else:
+            dest_icmp_dict['tunnel_port'] = "None"
 
         vif_names = discovery.get_vif_names(dest_icmp_dict['port_id'])
         for port_type, vif_name in vif_names.items():

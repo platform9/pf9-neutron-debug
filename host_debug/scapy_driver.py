@@ -14,7 +14,7 @@ ARP_OP_TYPE = ['', 'REQUEST', 'REPLY']
 
 class ScapyDriver(object):
 
-    def send_icmp_on_interface(self, interface_name,src_mac, dst_mac, src_ip, dst_ip, net_type, payload):
+    def send_icmp_on_interface(self, interface_name,src_mac, dst_mac, src_ip, dst_ip, payload):
         """Send DHCP Discovery over qvb device.
         """
         #Figure out how to obtain this qvb_device ip
@@ -22,7 +22,6 @@ class ScapyDriver(object):
         dst_ip = str(dst_ip)
         src_mac = str(src_mac)
         dst_mac = str(dst_mac)
-        net_type = str(net_type)
         payload = str(payload)
         interface_name = str(interface_name)
         ip = scapy.IP(src=src_ip,dst=dst_ip)
@@ -44,6 +43,14 @@ class ScapyDriver(object):
         dhcp = scapy.DHCP(options=[("message-type", "discover"), "end"])
         packet = ethernet / ip / udp / bootp / dhcp
         scapy.sendp(packet, iface=qbr_device)
+
+    def send_arp_on_interface(self, interface_name, src_mac, src_ip, dst_ip):
+        ethernet = scapy.Ether(dst='ff:ff:ff:ff:ff:ff',
+                               src=src_mac)
+        arp = scapy.ARP(op="who-has", hwsrc=src_mac, psrc=src_ip, pdst=dst_ip)
+        packet = ethernet / arp
+        scapy.sendp(packet, iface=interface_name)
+
 
     def get_dhcp_mt(self, buff):
         """Pick out DHCP Message Type from buffer.
@@ -68,7 +75,7 @@ class ScapyDriver(object):
     def get_arp_op(self, buff):
         ether_packet = scapy.Ether(buff)
         arp_packet = ether_packet[scapy.ARP]
-        return ARP_OP_TYPE[arp_packet.op]
+        return ARP_OP_TYPE[arp_packet.op], ether_packet.src, ether_packet.dst
 
 if __name__ == "__main__":
     scapy_dr = ScapyDriver()

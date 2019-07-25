@@ -52,6 +52,16 @@ def get_network_label(vm_network_id, neutron):
         if network['id'] == vm_network_id:
             return network['provider:physical_network']
 
+def get_network_type(vm_network_id, neutron):
+    for network in neutron.list_networks()['networks']:
+        if network['id'] == vm_network_id:
+            return network['provider:network_type']
+
+def get_start_ip(vm_network_id, neutron):
+    for subnet in neutron.list_subnets()['subnets']:
+	if subnet['network_id'] == vm_network_id:
+	    return subnet['allocation_pools'][0]['start']
+
 def get_bridge_name(network_label, host_id, neutron):
     auth_token = neutron.get_auth_info()['auth_token']
     r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts/%s/roles/pf9-neutron-ovs-agent' % (host_id),
@@ -63,6 +73,32 @@ def get_bridge_name(network_label, host_id, neutron):
         if parts[0] == network_label:
             return parts[1]
 
+def get_tunnel_ip(host_id, neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts/%s/roles/pf9-neutron-ovs-agent' % (host_id),
+                    headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    return r.json()['local_ip']
+
+def get_tunnel_port(host_id, tunnel_ip, neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts', headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    for host in r.json():
+        if host_id == host['id']:
+            for port, ip in host['extensions']['interfaces']['data']['iface_ip'].items():
+                if ip == tunnel_ip:
+                    return port
+
+def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
+    host_dict = dict()
+    host_list = []
+    for port in neutron.list_ports()['ports']:
+        if port['network_id'] == vm_network_id and port['status'] == "ACTIVE" and port['binding:host_id'] and port['binding:host_id'] != source_host_id:
+            host_list.append(port['binding:host_id'])
+    host_list = set(host_list)
+    for host in host_list:
+        host_dict[host] = get_tunnel_ip(host, neutron)
+    print host_dict
+    return host_dict
 
 # HOST Side
 def concat_vif_name(device_name, port_id):
