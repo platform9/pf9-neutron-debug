@@ -118,30 +118,6 @@ def create_server(conf, transport, target):
     server = oslo_messaging.get_rpc_server(transport, target, endpoints, executor='blocking')
     return server
 
-'''
-# DHCP RPC Message Functions
-def send_dhcp_to_remote_hosts(client, remote):
-    for host in remote['dhcp remote hosts']:
-        remote_host_recieve_dhcp_message(client, host)
-
-def remote_host_recieve_dhcp_message(client, dhcp_dict):
-    cctxt = client.prepare(server=dhcp_dict['host_id'])
-    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
-
-def local_host_recieve_dhcp_message(client, dhcp_dict):
-    cctxt = client.prepare(server=dhcp_dict['vm info']['host_id'])
-    cctxt.cast({}, 'init_dhcp', dhcp_d = dhcp_dict)
-
-def retrieve_remote_dhcp_data(client, remote):
-    for host in remote['dhcp remote hosts']:
-        cctxt = client.prepare(server=host['host_id'])
-        cctxt.cast({}, 'send_remote_listener_dhcp_data', remote=host)
-
-def check_dnsmasq_process(client, dhcp_dict, host_id):
-    cctxt = client.prepare(server=host_id)
-    flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
-    return flag
-'''
 
 if __name__ == '__main__':
     main()
