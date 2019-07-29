@@ -29,12 +29,12 @@ def init_dhcp_check(dhcp_dict):
 
     vif_names = discovery.get_vif_names(port_id)
     src_mac = dhcp_dict['vm info']['mac_address']
-    if dhcp_dict['network_type'] == 'vlan':
+    if dhcp_dict['vm info']['network_type'] == 'vlan':
         phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
         filter = "udp port (67 or 68) and ether host %s" % src_mac
-    elif dhcp_dict['network_type'] == 'vxlan':
-        phy_port = dhcp_dict['tunnel_port']
-        filter = "src %s" % tunnel_ip
+    elif dhcp_dict['vm info']['network_type'] == 'vxlan':
+        phy_port = dhcp_dict['vm info']['tunnel_port']
+        filter = "src %s" % dhcp_dict['vm info']['tunnel_ip']
     vif_names["local nic:" + phy_port] = phy_port
 
     listeners = []
@@ -53,9 +53,9 @@ def init_dhcp_check(dhcp_dict):
     for thread in threads:
 	thread.join()
 
-    if dhcp_dict['network_type'] == 'vlan':
+    if dhcp_dict['vm info']['network_type'] == 'vlan':
         data = set_listeners.get_sniff_result(listeners, scapy.get_dhcp_mt, "local host")
-    elif dhcp_dict['network_type'] == 'vxlan':
+    elif dhcp_dict['vm info']['network_type'] == 'vxlan':
         data = set_listeners.get_sniff_vxlan_result(src_mac, phy_port, listeners, scapy.get_dhcp_mt, "local host")
 
     dhcp_port_data = []
