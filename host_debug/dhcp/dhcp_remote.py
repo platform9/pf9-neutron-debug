@@ -50,15 +50,3 @@ def merge_data(data, dhcp_dict):
         data.update(port)
 
     return data
-
-
-def get_sniff_result(listeners,handler):
-    data = dict()
-    for listener in listeners:
-        vif_pre = listener.name
-        data["remote host:" + vif_pre] = []
-        for packet in listener.readpkts():
-            icmp_type, src, dst = handler(str(packet[1]))
-            if icmp_type is not None:
-               data["remote host:" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
-    return data

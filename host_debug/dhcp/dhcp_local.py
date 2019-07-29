@@ -1,11 +1,13 @@
 import sys
 sys.path.append('../common/')
+sys.path.append('../')
 
 import discovery
 import dhcp_port
 import phy_int
 import pcap_driver
 import scapy_driver
+import set_listeners
 import time
 
 VIF_PREFIX_LEN = 14
@@ -23,12 +25,17 @@ def init_dhcp_check(dhcp_dict):
     scapy = scapy_driver.ScapyDriver()
 
     port_id = dhcp_dict['vm info']['port_id']
-    vif_names = discovery.get_vif_names(port_id)
-    phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
-    vif_names["local nic:" + phy_port] = phy_port
+    network_type = dhcp_dict['vm info']['network_type']
 
+    vif_names = discovery.get_vif_names(port_id)
     src_mac = dhcp_dict['vm info']['mac_address']
-    filter = "udp port (67 or 68) and ether host %s" % src_mac
+    if dhcp_dict['network_type'] == 'vlan':
+        phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
+        filter = "udp port (67 or 68) and ether host %s" % src_mac
+    elif dhcp_dict['network_type'] == 'vxlan':
+        phy_port = dhcp_dict['tunnel_port']
+        filter = "src %s" % tunnel_ip
+    vif_names["local nic:" + phy_port] = phy_port
 
     listeners = []
     for k,v in vif_names.items():
@@ -46,7 +53,10 @@ def init_dhcp_check(dhcp_dict):
     for thread in threads:
 	thread.join()
 
-    data = get_sniff_result(listeners, scapy.get_dhcp_mt)
+    if dhcp_dict['network_type'] == 'vlan':
+        data = set_listeners.get_sniff_result(listeners, scapy.get_dhcp_mt, "local host")
+    elif dhcp_dict['network_type'] == 'vxlan':
+        data = set_listeners.get_sniff_vxlan_result(src_mac, phy_port, listeners, scapy.get_dhcp_mt, "local host")
 
     dhcp_port_data = []
     for local_port in dhcp_dict['dhcp local host']:
@@ -61,14 +71,3 @@ def init_dhcp_check(dhcp_dict):
 def inject_packets(scapy, vif_names, src_mac):
     scapy.send_dhcp_over_qbr(vif_names['qbr'], src_mac)
     time.sleep(3)
-
-def get_sniff_result(listeners,handler):
-    data = dict()
-    for listener in listeners:
-        vif_pre = listener.name
-        data["local host:" + vif_pre] = []
-        for packet in listener.readpkts():
-            icmp_type, src, dst = handler(str(packet[1]))
-            if icmp_type is not None:
-               data["local host:" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
-    return data

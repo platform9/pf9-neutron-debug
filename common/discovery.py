@@ -52,6 +52,11 @@ def get_network_label(vm_network_id, neutron):
         if network['id'] == vm_network_id:
             return network['provider:physical_network']
 
+def get_network_type(vm_network_id, neutron):
+    for network in neutron.list_networks()['networks']:
+        if network['id'] == vm_network_id:
+            return network['provider:network_type']
+
 def get_bridge_name(network_label, host_id, neutron):
     auth_token = neutron.get_auth_info()['auth_token']
     r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts/%s/roles/pf9-neutron-ovs-agent' % (host_id),
@@ -63,6 +68,20 @@ def get_bridge_name(network_label, host_id, neutron):
         if parts[0] == network_label:
             return parts[1]
 
+def get_tunnel_ip(host_id, neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts/%s/roles/pf9-neutron-ovs-agent' % (host_id),
+                    headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    return r.json()['local_ip']
+
+def get_tunnel_port(host_id, tunnel_ip, neutron):
+    auth_token = neutron.get_auth_info()['auth_token']
+    r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts', headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
+    for host in r.json():
+        if host_id == host['id']:
+            for port, ip in host['extensions']['interfaces']['data']['iface_ip']:
+                if ip == tunnel_ip:
+                    return port
 
 # HOST Side
 def concat_vif_name(device_name, port_id):

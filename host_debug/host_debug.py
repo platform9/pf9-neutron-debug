@@ -37,7 +37,7 @@ class CheckerEndpoint(object):
 
     def send_remote_listener_dhcp_data(self, ctx, remote):
         self.thread.join()
-        dhcp_remote_data = dhcp_remote.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt)
+        dhcp_remote_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt, "remote host")
         dhcp_remote_data = dhcp_remote.merge_data(dhcp_remote_data, remote)
         return_to_du(dhcp_remote_data)
 
