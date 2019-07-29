@@ -79,7 +79,7 @@ def get_tunnel_port(host_id, tunnel_ip, neutron):
     r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts', headers={'x-auth-token': auth_token, 'Content-type': 'application/json'})
     for host in r.json():
         if host_id == host['id']:
-            for port, ip in host['extensions']['interfaces']['data']['iface_ip']:
+            for port, ip in host['extensions']['interfaces']['data']['iface_ip'].items():
                 if ip == tunnel_ip:
                     return port
 
