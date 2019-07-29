@@ -58,7 +58,7 @@ def get_sniff_vxlan_result(src_mac, phy_port,listeners, handler, tag):
             inner_packet = outer_ether.load
             inner_ether = scapy.Ether(inner_packet)
             if listener.name == phy_port:
-                if inner_ether.src == src_mac:
+                if inner_ether.src == src_mac and "DHCP" in inner_ether:
                     icmp_type, src, dst = handler(str(inner_packet))
                     if icmp_type is not None:
                         data[tag + ":" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])

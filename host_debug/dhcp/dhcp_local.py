@@ -31,15 +31,19 @@ def init_dhcp_check(dhcp_dict):
     src_mac = dhcp_dict['vm info']['mac_address']
     if dhcp_dict['vm info']['network_type'] == 'vlan':
         phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
-        filter = "udp port (67 or 68) and ether host %s" % src_mac
     elif dhcp_dict['vm info']['network_type'] == 'vxlan':
         phy_port = dhcp_dict['vm info']['tunnel_port']
-        filter = "src %s" % dhcp_dict['vm info']['tunnel_ip']
     vif_names["local nic:" + phy_port] = phy_port
+
+    filter = "udp port (67 or 68) and ether host %s" % src_mac
+    vxlan_filter = "(src %s or dst %s) and udp port (4789)" % (dhcp_dict['vm info']['tunnel_ip'], dhcp_dict['vm info']['tunnel_ip'])
 
     listeners = []
     for k,v in vif_names.items():
-        listeners.append(pcap.setup_listener(v, filter))
+        if "local nic" in k and dhcp_dict['vm info']['network_type'] == 'vxlan':
+            listeners.append(pcap.setup_listener(v, vxlan_filter))
+        else:
+            listeners.append(pcap.setup_listener(v, filter))
 
     threads = []
     for local_port in dhcp_dict['dhcp local host']:
