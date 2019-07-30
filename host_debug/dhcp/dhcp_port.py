@@ -4,6 +4,7 @@ import scapy_driver
 import threading
 from scapy import all as scapy
 
+PORT_ID_PREFEX = 11
 DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
                               'DHCPDECLINE', 'DHCPACK', 'DHCPNAK', 'DHCPRELEASE']
 
@@ -40,7 +41,7 @@ def merge_data(data, dhcp_dict):
 
     dhcp_listener_data = []
     port_id = dhcp_dict['port_id'][:PORT_ID_PREFEX]
-    dhcp_listener_data.append(dhcp_port.get_port_data(port_id, "remote host dhcp server:"))
+    dhcp_listener_data.append(get_port_data(port_id, "remote host dhcp server:"))
 
     for port in dhcp_listener_data:
         data.update(port)

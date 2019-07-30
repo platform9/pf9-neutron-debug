@@ -37,7 +37,7 @@ class CheckerEndpoint(object):
 
 
     def send_remote_listener_dhcp_data(self, ctx, remote):
-        dhcp_remote_data = self.dhcp_remote.collect_data()
+        dhcp_remote_data = self.dhcp_remote_obj.collect_data()
         return_to_du(dhcp_remote_data)
 
     def init_dhcp(self, ctx, dhcp_d):
@@ -45,8 +45,8 @@ class CheckerEndpoint(object):
 	   self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
            return_to_du(self.dhcp_local_data)
         elif "dhcp remote host" in dhcp_d.keys():
-            self.dhcp_remote = DHCPRemote(dhcp_d)
-            self.dhcp_remote.init_dhcp_check()
+	   self.dhcp_remote_obj = dhcp_remote.DHCPRemote(dhcp_d)
+	   self.dhcp_remote_obj.init_dhcp_check()
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 

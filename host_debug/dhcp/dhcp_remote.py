@@ -48,8 +48,6 @@ class DHCPRemote:
             else:
                 listeners.append(pcap.setup_listener(v, filter))
 
-        # for dhcp_server in dhcp_dict['dhcp local host']:
-            ## TODO: Add ports for DHCP tap interface to listeners
         port_id = self.dhcp_dict['port_id'][:PORT_ID_PREFEX]
         t_thread = dhcp_port.create_pcap_file(port_id, self.dhcp_dict['network_id'], self.dhcp_dict['src_mac_address'], timeout=7)
 
@@ -57,7 +55,6 @@ class DHCPRemote:
         self.t_thread = t_thread
         self.phy_port = phy_port
         self.src_mac = src_mac
-        #return listeners, t_thread
 
     def collect_data(self):
         self.t_thread.join()
@@ -66,3 +63,4 @@ class DHCPRemote:
         elif self.dhcp_dict['network_type'] == 'vxlan':
             dhcp_remote_data = set_listeners.get_sniff_vxlan_result(self.src_mac, self.phy_port, self.listeners, self.scapy.get_dhcp_mt, "remote host")
         dhcp_remote_data = dhcp_port.merge_data(dhcp_remote_data, self.dhcp_dict)
+	return dhcp_remote_data
