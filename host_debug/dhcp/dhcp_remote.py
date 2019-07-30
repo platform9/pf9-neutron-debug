@@ -1,11 +1,13 @@
 import sys
 sys.path.append('../common/')
+sys.path.append('../')
 
 import dhcp_port
 import discovery
 import phy_int
 import pcap_driver
 import scapy_driver
+import set_listeners
 import time
 
 VIF_PREFIX_LEN = 14
@@ -17,36 +19,50 @@ DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
 DHCP_NS_PREFIX = 'qdhcp-'
 ARP_OP_TYPE = ['', 'REQUEST', 'REPLY']
 
+class DHCPRemote:
 
-def init_dhcp_check(dhcp_dict):
-    pcap = pcap_driver.PcapDriver()
-    scapy = scapy_driver.ScapyDriver()
+    def __init__(self, dhcp_dict):
+        self.dhcp_dict = dhcp_dict
+        self.scapy = scapy_driver.ScapyDriver()
 
-    vif_names = {}
-    phy_port = phy_int.get_phy_interface(dhcp_dict['bridge_name'])
-    vif_names[phy_port] = phy_port
 
-    src_mac = dhcp_dict['src_mac_address']
-    filter = "udp port (67 or 68) and ether host %s" % src_mac
+    def init_dhcp_check(self):
+        pcap = pcap_driver.PcapDriver()
 
-    listeners = []
-    for k,v in vif_names.items():
-        listeners.append(pcap.setup_listener(v, filter))
+        vif_names = {}
+        src_mac = self.dhcp_dict['src_mac_address']
 
-    # for dhcp_server in dhcp_dict['dhcp local host']:
-        ## TODO: Add ports for DHCP tap interface to listeners
-    port_id = dhcp_dict['port_id'][:PORT_ID_PREFEX]
-    t_thread = dhcp_port.create_pcap_file(port_id, dhcp_dict['network_id'], dhcp_dict['src_mac_address'], timeout=7)
+        if self.dhcp_dict['network_type'] == 'vlan':
+            phy_port = phy_int.get_phy_interface(self.dhcp_dict['bridge_name'])
+        elif self.dhcp_dict['network_type'] == 'vxlan':
+            phy_port = self.dhcp_dict['tunnel_port']
+        vif_names["remote nic:" + phy_port] = phy_port
 
-    return listeners, t_thread
+        filter = "udp port (67 or 68) and ether host %s" % src_mac
+        vxlan_filter = "(src %s or dst %s) and udp port (4789)" % (self.dhcp_dict['tunnel_ip'], self.dhcp_dict['tunnel_ip'])
 
-def merge_data(data, dhcp_dict):
+        listeners = []
+        for k,v in vif_names.items():
+            if "remote nic" in k and self.dhcp_dict['network_type'] == 'vxlan':
+                listeners.append(pcap.setup_listener(v, vxlan_filter))
+            else:
+                listeners.append(pcap.setup_listener(v, filter))
 
-    dhcp_listener_data = []
-    port_id = dhcp_dict['port_id'][:PORT_ID_PREFEX]
-    dhcp_listener_data.append(dhcp_port.get_port_data(port_id, "remote host dhcp server:"))
+        # for dhcp_server in dhcp_dict['dhcp local host']:
+            ## TODO: Add ports for DHCP tap interface to listeners
+        port_id = self.dhcp_dict['port_id'][:PORT_ID_PREFEX]
+        t_thread = dhcp_port.create_pcap_file(port_id, self.dhcp_dict['network_id'], self.dhcp_dict['src_mac_address'], timeout=7)
 
-    for port in dhcp_listener_data:
-        data.update(port)
+        self.listeners = listeners
+        self.t_thread = t_thread
+        self.phy_port = phy_port
+        self.src_mac = src_mac
+        #return listeners, t_thread
 
-    return data
+    def collect_data(self):
+        self.t_thread.join()
+        if self.dhcp_dict['network_type'] == 'vlan':
+            dhcp_remote_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt, "remote host")
+        elif self.dhcp_dict['network_type'] == 'vxlan':
+            dhcp_remote_data = set_listeners.get_sniff_vxlan_result(self.src_mac, self.phy_port, self.listeners, self.scapy.get_dhcp_mt, "remote host")
+        dhcp_remote_data = dhcp_port.merge_data(dhcp_remote_data, self.dhcp_dict)
