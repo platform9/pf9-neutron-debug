@@ -61,6 +61,6 @@ class DHCPRemote:
         if self.dhcp_dict['network_type'] == 'vlan':
             dhcp_remote_data = set_listeners.get_sniff_result(self.listeners, self.scapy.get_dhcp_mt, "remote host")
         elif self.dhcp_dict['network_type'] == 'vxlan':
-            dhcp_remote_data = set_listeners.get_sniff_vxlan_result(self.src_mac, self.phy_port, self.listeners, self.scapy.get_dhcp_mt, "remote host")
+            dhcp_remote_data = set_listeners.get_sniff_vxlan_result(self.src_mac, self.phy_port, self.listeners, self.scapy.get_dhcp_mt, "remote host", dhcp_dict['checker_type'])
         dhcp_remote_data = dhcp_port.merge_data(dhcp_remote_data, self.dhcp_dict)
 	return dhcp_remote_data

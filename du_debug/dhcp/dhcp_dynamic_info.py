@@ -44,6 +44,7 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, net
     local_dhcp_dict = {}
     vm_info = {}
     vm_info['network_id'] = vm_port_dict['network_id']
+    vm_info['checker_type'] = "DHCP"
     vm_info['port_id'] = vm_port_dict['id']
     vm_info['device_id'] = vm_port_dict['device_id']
     vm_info['host_id'] = vm_port_dict['binding:host_id']
@@ -77,7 +78,7 @@ def format_dhcp_dict(vm_port_dict, same_host, different_host, network_label, net
         else:
             tunnel_port = "None"
         dhcp_different_host.append({'port_id':port['id'], 'network_label':network_label, 'network_type':network_type, 'network_id':port['network_id'], 'bridge_name':dhcp_bridge_name,
-		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'tunnel_ip':tunnel_ip, 'tunnel_port':tunnel_port, 'dhcp remote host':""})
+		'host_id':dhcp_host_id, 'src_mac_address':vm_port_dict['mac_address'], 'tunnel_ip':tunnel_ip, 'tunnel_port':tunnel_port, 'checker_type':"DHCP", 'dhcp remote host':""})
     remote_dhcp_dict['dhcp remote hosts'] = dhcp_different_host
 
     local_dhcp_dict['remote hosts'] = []

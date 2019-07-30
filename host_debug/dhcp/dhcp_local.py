@@ -61,7 +61,7 @@ def init_dhcp_check(dhcp_dict):
     if dhcp_dict['vm info']['network_type'] == 'vlan':
         data = set_listeners.get_sniff_result(listeners, scapy.get_dhcp_mt, "local host")
     elif dhcp_dict['vm info']['network_type'] == 'vxlan':
-        data = set_listeners.get_sniff_vxlan_result(src_mac, phy_port, listeners, scapy.get_dhcp_mt, "local host")
+        data = set_listeners.get_sniff_vxlan_result(src_mac, phy_port, listeners, scapy.get_dhcp_mt, "local host", dhcp_dict['vm info']['checker_type'])
 
     dhcp_port_data = []
     for local_port in dhcp_dict['dhcp local host']:

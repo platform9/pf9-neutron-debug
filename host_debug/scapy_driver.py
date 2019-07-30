@@ -14,7 +14,7 @@ ARP_OP_TYPE = ['', 'REQUEST', 'REPLY']
 
 class ScapyDriver(object):
 
-    def send_icmp_on_interface(self, interface_name,src_mac, dst_mac, src_ip, dst_ip, net_type, payload):
+    def send_icmp_on_interface(self, interface_name,src_mac, dst_mac, src_ip, dst_ip, payload):
         """Send DHCP Discovery over qvb device.
         """
         #Figure out how to obtain this qvb_device ip
