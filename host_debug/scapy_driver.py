@@ -22,7 +22,6 @@ class ScapyDriver(object):
         dst_ip = str(dst_ip)
         src_mac = str(src_mac)
         dst_mac = str(dst_mac)
-        net_type = str(net_type)
         payload = str(payload)
         interface_name = str(interface_name)
         ip = scapy.IP(src=src_ip,dst=dst_ip)

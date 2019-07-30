@@ -47,7 +47,7 @@ class SetListener:
         vif_dict = dict()
 
         for vif in vif_names:
-    	vif_dict[vif[vif.keys()[0]]['port_type']] = vif.keys()[0]
+    	   vif_dict[vif[vif.keys()[0]]['port_type']] = vif.keys()[0]
 
         return vif_dict
 
@@ -81,6 +81,7 @@ def get_sniff_vxlan_result(src_mac, phy_port,listeners, handler, tag, checker_ty
             	outer_ether = scapy.Ether(packet[1])
             	inner_packet = outer_ether.load
             	inner_ether = scapy.Ether(inner_packet)
+		print checker_type in inner_ether
                 if (inner_ether.src == src_mac or inner_ether.dst == src_mac) and checker_type in inner_ether:
                     icmp_type, src, dst = handler(str(inner_packet))
                     if icmp_type is not None:
