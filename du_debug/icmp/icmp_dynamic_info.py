@@ -35,7 +35,7 @@ class ICMPInfo:
 
     def format_source_dict(self):
         source_icmp_dict = dict()
-        source_icmp_dict['checker_type'] == "ICMP"
+        source_icmp_dict['checker_type'] = "ICMP"
         source_icmp_dict['vm_name'] = self.source_vm
         source_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         source_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -73,7 +73,7 @@ class ICMPInfo:
     def format_dest_dict(self):
 
         dest_icmp_dict = dict()
-        dest_icmp_dict['checker type'] = "ICMP"
+        dest_icmp_dict['checker_type'] = "ICMP"
         dest_icmp_dict['vm_name'] = self.dest_vm
         dest_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         dest_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']

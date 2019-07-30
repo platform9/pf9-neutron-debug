@@ -44,19 +44,13 @@ class GetHostDataEndpoint(object):
 
     def __init__(self, server):
         self.server = server
-        self.counter = 0
-        self.log_info = log_data.LogData()
+	self.log_info = log_data.LogData()
 
     def recieve_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
         global stop_thread
         self.log_info.log_data(d)
-        self.counter = self.counter + 1
-        if self.counter == 2:
-            # DHCP analysis
-            #self.log_info.analyze()
-            stop_thread = True
 
     def get_message(self, ctx, message):
         logs.info(message)
@@ -81,6 +75,7 @@ def main():
     server.wait()
 
     server_thread = threading.Thread(target=server_process, args=(server,))
+    server_thread.daemon = True
     server_thread.start()
 
     start_wsgi_server()
@@ -97,14 +92,8 @@ def server_process(rpcserver):
 	rpcserver.reset()
         rpcserver.start()
 	print "Server Starting..."
-        #for i in range(0,35):
         while True:
            time.sleep(1)
-           if stop_thread:
-	      print("All done..Stopping Server")
-              rpcserver.stop()
-	      rpcserver.wait()
-	      break
     except KeyboardInterrupt:
         rpcserver.stop()
 	rpcserver.wait()
