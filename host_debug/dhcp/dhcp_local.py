@@ -37,6 +37,7 @@ def init_dhcp_check(dhcp_dict):
 
     filter = "udp port (67 or 68) and ether host %s" % src_mac
     vxlan_filter = "(src %s or dst %s) and udp port (4789)" % (dhcp_dict['vm info']['tunnel_ip'], dhcp_dict['vm info']['tunnel_ip'])
+    #vxlan_filter = "src %s" % dhcp_dict['vm info']['tunnel_ip']
 
     listeners = []
     for k,v in vif_names.items():
