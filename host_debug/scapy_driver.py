@@ -44,6 +44,14 @@ class ScapyDriver(object):
         packet = ethernet / ip / udp / bootp / dhcp
         scapy.sendp(packet, iface=qbr_device)
 
+    def send_arp_on_interface(self, interface_name, src_mac, src_ip, dst_ip):
+        ethernet = scapy.Ether(dst='ff:ff:ff:ff:ff:ff',
+                               src=src_mac)
+        arp = scapy.ARP(op="who-has", hwsrc=src_mac, psrc=src_ip, pdst=dst_ip)
+        packet = ethernet / arp
+        scapy.sendp(packet, iface=interface_name)
+
+
     def get_dhcp_mt(self, buff):
         """Pick out DHCP Message Type from buffer.
         """

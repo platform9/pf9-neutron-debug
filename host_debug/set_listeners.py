@@ -28,7 +28,7 @@ class SetListener:
             phy_port = phy_int.get_phy_interface(self.listener_dict['bridge_name'])
         vif_names["nic:" + phy_port] = phy_port
 
-        filter = self.listener_dict['filter'] % (self.listener_dict['src_ip_address'], self.listener_dict['dest_ip_address'], self.listener_dict['dest_ip_address'], self.listener_dict['src_ip_address'])
+        filter = self.listener_dict['filter']
 
         listeners = []
         for k,v in vif_names.items():
@@ -54,10 +54,12 @@ class SetListener:
     def collect_data(self):
         if self.listener_dict['checker_type'] == "ICMP":
             if self.listener_dict['network_type'] == "vlan":
-                icmp_data = get_sniff_result(self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'])
+                data = get_sniff_result(self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'])
             elif self.listener_dict['network_type'] == "vxlan":
-                icmp_data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
-        return icmp_data
+                data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
+        elif self.listener_dict['checker_type'] == "ARP":
+            data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_arp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
+        return data
 
 
 def get_sniff_result(listeners, handler, tag):
@@ -66,9 +68,9 @@ def get_sniff_result(listeners, handler, tag):
         vif_pre = listener.name
         data[tag + ":" + vif_pre] = []
         for packet in listener.readpkts():
-            icmp_type, src, dst = handler(str(packet[1]))
-            if icmp_type is not None:
-               data[tag + ":" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
+            packet_type, src, dst = handler(str(packet[1]))
+            if packet_type is not None:
+               data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
     return data
 
 def get_sniff_vxlan_result(src_mac, phy_port,listeners, handler, tag, checker_type):
@@ -81,13 +83,12 @@ def get_sniff_vxlan_result(src_mac, phy_port,listeners, handler, tag, checker_ty
             	outer_ether = scapy.Ether(packet[1])
             	inner_packet = outer_ether.load
             	inner_ether = scapy.Ether(inner_packet)
-		print checker_type in inner_ether
                 if (inner_ether.src == src_mac or inner_ether.dst == src_mac) and checker_type in inner_ether:
-                    icmp_type, src, dst = handler(str(inner_packet))
-                    if icmp_type is not None:
-                        data[tag + ":" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
+                    packet_type, src, dst = handler(str(inner_packet))
+                    if packet_type is not None:
+                        data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
             else:
-                icmp_type, src, dst = handler(str(packet[1]))
-                if icmp_type is not None:
-                   data[tag + ":" + vif_pre].append([icmp_type, "src: %s" % src, "dst: %s" % dst])
+                packet_type, src, dst = handler(str(packet[1]))
+                if packet_type is not None:
+                   data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
     return data

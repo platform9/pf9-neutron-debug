@@ -54,10 +54,15 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=listen_dict['host_id'])
         cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
 
-    def source_inject(self, inject_dict):
+    def source_icmp_inject(self, inject_dict):
 
         cctxt = self.client.prepare(server=inject_dict['host_id'])
         cctxt.cast({}, 'inject_icmp_packet', inject_dict = inject_dict)
+
+    def source_arp_inject(self, inject_dict):
+
+        cctxt = self.client.prepare(server=inject_dict['host_id'])
+        cctxt.cast({}, 'inject_arp_packet', inject_dict = inject_dict)
 
     def retrieve_listener_data(self, listen_dict):
 

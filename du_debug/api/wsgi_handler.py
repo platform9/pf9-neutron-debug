@@ -4,6 +4,7 @@ sys.path.append("../")
 from flask import Flask, request, Response, jsonify
 from oslo_config import cfg
 from oslo_log import log as logging
+import arp_dynamic_info
 import importlib
 import init_neutron_client
 import dhcp_dynamic_info
@@ -66,6 +67,10 @@ def single_vm_checker(vm_name):
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
 
+    arp_info = arp_dynamic_info.ARPInfo(source_vm, neutron)
+    source_arp_dict = arp_info.get_source_arp_dict()
+    inject_arp_dict = arp_info.get_inject_arp_dict()
+
     icmp_info = icmp_dynamic_info.ICMPInfo(source_vm, dest_vm, neutron)
     source_icmp_dict = icmp_info.get_source_icmp_dict()
     dest_icmp_dict = icmp_info.get_dest_icmp_dict()
@@ -82,10 +87,17 @@ def paired_vms_checker(source_vm, dest_vm):
     client_obj = du_rpc_handler.RPCClientObject(CONF)
 
     if request.method == 'GET':
+        if source_arp_dict['network_type'] == "vxlan":
+            client_obj.listen_on_host(source_arp_dict)
+            time.sleep(3)
+            client_obj.source_arp_inject(inject_arp_dict)
+            time.sleep(3)
+            client_obj.retrieve_listener_data(source_arp_dict)
+
         client_obj.listen_on_host(source_icmp_dict)
         client_obj.listen_on_host(dest_icmp_dict)
         time.sleep(3)
-        client_obj.source_inject(inject_icmp_dict)
+        client_obj.source_icmp_inject(inject_icmp_dict)
         time.sleep(3)
         client_obj.retrieve_listener_data(source_icmp_dict)
         client_obj.retrieve_listener_data(dest_icmp_dict)

@@ -67,10 +67,15 @@ class CheckerEndpoint(object):
         self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], inject_dict['payload'])
         time.sleep(1)
 
+    def inject_arp_packet(self, ctx, inject_dict):
+
+        self.scapy.send_arp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'])
+        time.sleep(1)
+
     def send_listener_data(self, ctx, listener_dict):
 
-        icmp_data = self.set_listen_obj.collect_data()
-        return_to_du(icmp_data)
+        checker_data = self.set_listen_obj.collect_data()
+        return_to_du(checker_data)
 
 def main():
 

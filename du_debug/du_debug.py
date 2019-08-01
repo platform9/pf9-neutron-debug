@@ -49,7 +49,6 @@ class GetHostDataEndpoint(object):
     def recieve_dict(self, ctx, d):
         print "_______________RETURNED JSON___________________"
         print d
-        global stop_thread
         self.log_info.log_data(d)
 
     def get_message(self, ctx, message):
