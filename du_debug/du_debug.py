@@ -5,6 +5,7 @@ sys.path.append('../common/')
 sys.path.append('./dhcp/')
 sys.path.append('./icmp/')
 sys.path.append('./api')
+sys.path.append('./arp')
 
 import time
 import oslo_messaging

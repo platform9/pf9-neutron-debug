@@ -57,6 +57,11 @@ def get_network_type(vm_network_id, neutron):
         if network['id'] == vm_network_id:
             return network['provider:network_type']
 
+def get_start_ip(vm_network_id, neutron):
+    for subnet in neutron.list_subnets()['subnets']:
+	if subnet['network_id'] == vm_network_id:
+	    return subnet['allocation_pools'][0]['start']
+
 def get_bridge_name(network_label, host_id, neutron):
     auth_token = neutron.get_auth_info()['auth_token']
     r = requests.get('https://neutrondebug.platform9.horse/resmgr/v1/hosts/%s/roles/pf9-neutron-ovs-agent' % (host_id),

@@ -4,13 +4,14 @@ sys.path.append("../")
 from flask import Flask, request, Response, jsonify
 from oslo_config import cfg
 from oslo_log import log as logging
-import arp_dynamic_info
 import importlib
+import arp_dynamic_info
 import init_neutron_client
 import dhcp_dynamic_info
 import dhcp_static_info
 import du_rpc_handler
 import icmp_dynamic_info
+import arp_dynamic_info
 import log_data
 import logging as logs
 import oslo_messaging
@@ -67,6 +68,7 @@ def single_vm_checker(vm_name):
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
 
+    #pdb.set_trace()
     arp_info = arp_dynamic_info.ARPInfo(source_vm, neutron)
     source_arp_dict = arp_info.get_source_arp_dict()
     inject_arp_dict = arp_info.get_inject_arp_dict()
