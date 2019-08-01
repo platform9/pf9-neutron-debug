@@ -75,7 +75,7 @@ class ScapyDriver(object):
     def get_arp_op(self, buff):
         ether_packet = scapy.Ether(buff)
         arp_packet = ether_packet[scapy.ARP]
-        return ARP_OP_TYPE[arp_packet.op]
+        return ARP_OP_TYPE[arp_packet.op], ether_packet.src, ether_packet.dst
 
 if __name__ == "__main__":
     scapy_dr = ScapyDriver()

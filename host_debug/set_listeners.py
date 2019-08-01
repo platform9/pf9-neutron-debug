@@ -58,7 +58,7 @@ class SetListener:
             elif self.listener_dict['network_type'] == "vxlan":
                 data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
         elif self.listener_dict['checker_type'] == "ARP":
-            data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_arp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
+            data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_arp_op, self.listener_dict['tag'], self.listener_dict['checker_type'])
         return data
 
 
