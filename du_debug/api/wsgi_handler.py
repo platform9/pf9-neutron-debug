@@ -37,6 +37,11 @@ def single_vm_checker(vm_name):
     print "HEARTBEAT tests look OK, ready to move on"
 
     # DHCP Dict
+    arp_info = arp_dynamic_info.ARPInfo(vm_name, neutron)
+    source_arp_dict = arp_info.get_source_arp_dict()
+    inject_arp_dict = arp_info.get_inject_arp_dict()
+
+
     local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
@@ -55,14 +60,29 @@ def single_vm_checker(vm_name):
             stop_thread = True
             sys.exit()
 
+    dhcp_response_list = []
     if request.method == 'GET':
+
+        if source_arp_dict['network_type'] == "vxlan":
+            client_obj.listen_on_host(source_arp_dict)
+            time.sleep(3)
+            client_obj.source_arp_inject(inject_arp_dict)
+            time.sleep(3)
+            arp_response_dict = client_obj.retrieve_listener_data(source_arp_dict)
+
         client_obj.send_dhcp_to_remote_hosts(remote)
         time.sleep(2)
-        client_obj.local_host_recieve_dhcp_message(local)
-        time.sleep(7)
-        client_obj.retrieve_remote_dhcp_data(remote)
+        local_dhcp_response_dict = client_obj.local_host_recieve_dhcp_message(local)
+        #time.sleep(7)
+        remote_dhcp_response_list = client_obj.retrieve_remote_dhcp_data(remote)
 
-    return Response(status=200)
+    dhcp_response_list = remote_dhcp_response_list
+    dhcp_response_list.append(local_dhcp_response_dict)
+    dhcp_response_list.append(arp_response_dict)
+
+    resp = make_response(jsonify(dhcp_response_list), 200)
+    resp.headers['Packet Data'] = 'THERE'
+    return resp
 
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
@@ -102,8 +122,9 @@ def paired_vms_checker(source_vm, dest_vm):
         source_response_dict = client_obj.retrieve_listener_data(source_icmp_dict)
         dest_response_dict = client_obj.retrieve_listener_data(dest_icmp_dict)
 
-    response_array = [arp_response_dict, source_response_dict, dest_response_dict]
-    resp = make_response(jsonify(response_array), 200)
+    response_list = [arp_response_dict, source_response_dict, dest_response_dict]
+    
+    resp = make_response(jsonify(response_list), 200)
     resp.headers['Packet Data'] = 'THERE'
     return resp
 

@@ -38,12 +38,14 @@ class CheckerEndpoint(object):
 
     def send_remote_listener_dhcp_data(self, ctx, remote):
         dhcp_remote_data = self.dhcp_remote_obj.collect_data()
-        return_to_du(dhcp_remote_data)
+        log_to_du(dhcp_remote_data)
+        return dhcp_remote_data
 
     def init_dhcp(self, ctx, dhcp_d):
 	if "dhcp local host" in dhcp_d.keys():
 	   self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
-           return_to_du(self.dhcp_local_data)
+           log_to_du(self.dhcp_local_data)
+           return self.dhcp_local_data
         elif "dhcp remote host" in dhcp_d.keys():
 	   self.dhcp_remote_obj = dhcp_remote.DHCPRemote(dhcp_d)
 	   self.dhcp_remote_obj.init_dhcp_check()
@@ -75,7 +77,7 @@ class CheckerEndpoint(object):
     def send_listener_data(self, ctx, listener_dict):
 
         checker_data = self.set_listen_obj.collect_data()
-        return_to_du(checker_data)
+        log_to_du(checker_data)
         return checker_data
 
 def main():
@@ -109,7 +111,7 @@ def main():
 	print("Stopping server")
 
 
-def return_to_du(transport_json):
+def log_to_du(transport_json):
 
     client = oslo_messaging.RPCClient(transport, du_target)
     client.cast({}, 'recieve_dict', d=transport_json)
