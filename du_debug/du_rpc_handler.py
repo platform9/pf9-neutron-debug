@@ -67,4 +67,5 @@ class RPCClientObject:
     def retrieve_listener_data(self, listen_dict):
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])
-        cctxt.cast({}, 'send_listener_data', listener_dict = listen_dict)
+        response_dict = cctxt.call({}, 'send_listener_data', listener_dict = listen_dict)
+        return response_dict

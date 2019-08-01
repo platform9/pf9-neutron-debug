@@ -76,6 +76,7 @@ class CheckerEndpoint(object):
 
         checker_data = self.set_listen_obj.collect_data()
         return_to_du(checker_data)
+        return checker_data
 
 def main():
 

@@ -94,17 +94,17 @@ def paired_vms_checker(source_vm, dest_vm):
             time.sleep(3)
             client_obj.source_arp_inject(inject_arp_dict)
             time.sleep(3)
-            client_obj.retrieve_listener_data(source_arp_dict)
+            arp_response_dict = client_obj.retrieve_listener_data(source_arp_dict)
 
         client_obj.listen_on_host(source_icmp_dict)
         client_obj.listen_on_host(dest_icmp_dict)
         time.sleep(3)
         client_obj.source_icmp_inject(inject_icmp_dict)
         time.sleep(3)
-        client_obj.retrieve_listener_data(source_icmp_dict)
-        client_obj.retrieve_listener_data(dest_icmp_dict)
+        source_response_dict = client_obj.retrieve_listener_data(source_icmp_dict)
+        dest_response_dict = client_obj.retrieve_listener_data(dest_icmp_dict)
 
-    return Response(status=200)
+    return jsonify(arp_response_dict), jsonify(source_response_dict), jsonify(dest_response_dict), 200
 
 def app_factory(global_config, **local_conf):
     return app
