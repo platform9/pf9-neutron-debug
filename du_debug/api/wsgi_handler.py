@@ -1,7 +1,7 @@
 import sys
 sys.path.append("../")
 
-from flask import Flask, request, Response, jsonify
+from flask import Flask, request, Response, jsonify, make_response
 from oslo_config import cfg
 from oslo_log import log as logging
 import importlib
@@ -11,7 +11,6 @@ import dhcp_dynamic_info
 import dhcp_static_info
 import du_rpc_handler
 import icmp_dynamic_info
-import arp_dynamic_info
 import log_data
 import logging as logs
 import oslo_messaging
@@ -85,7 +84,6 @@ def paired_vms_checker(source_vm, dest_vm):
     print "INJECT SOURCE ICMP DICT"
     print inject_icmp_dict
 
-    print CONF
     client_obj = du_rpc_handler.RPCClientObject(CONF)
 
     if request.method == 'GET':
@@ -104,7 +102,10 @@ def paired_vms_checker(source_vm, dest_vm):
         source_response_dict = client_obj.retrieve_listener_data(source_icmp_dict)
         dest_response_dict = client_obj.retrieve_listener_data(dest_icmp_dict)
 
-    return jsonify(arp_response_dict), jsonify(source_response_dict), jsonify(dest_response_dict), 200
+    response_array = [arp_response_dict, source_response_dict, dest_response_dict]
+    resp = make_response(jsonify(response_array), 200)
+    resp.headers['Packet Data'] = 'THERE'
+    return resp
 
 def app_factory(global_config, **local_conf):
     return app
