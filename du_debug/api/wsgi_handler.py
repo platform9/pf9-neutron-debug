@@ -22,14 +22,17 @@ logs.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode =
 
 @app.route('/v1/single/<string:vm_name>', methods=['GET'])
 def single_vm_checker(vm_name):
- 
+
     error_code = dhcp_static_info.run_du_static_checks(vm_name, init_checker.neutron)
     if error_code:
         sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
     print "HEARTBEAT tests look OK, ready to move on"
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
-    arp_response_dict = init_checker.run_arp_checker(vm_name, client_obj)
+    arp_response_dict, message, code = init_checker.run_arp_checker(vm_name, client_obj)
+    if code:
+        return Response(message, status=200)
+
     local_dhcp_response_dict, remote_dhcp_response_list = init_checker.run_dhcp_checker(vm_name, client_obj)
 
     response_list = remote_dhcp_response_list
@@ -44,7 +47,10 @@ def single_vm_checker(vm_name):
 def paired_vms_checker(source_vm, dest_vm):
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
-    arp_response_dict = init_checker.run_arp_checker(source_vm, client_obj)
+    arp_response_dict, message, code = init_checker.run_arp_checker(source_vm, client_obj)
+    if code:
+        return Response(message, status=200)
+
     source_icmp_response_dict, dest_icmp_response_dict = init_checker.run_icmp_checker(source_vm, dest_vm, client_obj)
 
     response_list = [arp_response_dict, source_icmp_response_dict, dest_icmp_response_dict]

@@ -32,6 +32,7 @@ class ARPInfo:
 
         self.source_arp_listen_dict = self.format_source_dict()
         self.inject_arp_dict = self.format_inject_dict()
+        self.host_dict = discovery.get_vxlan_host_dict(self.network_id, self.neutron)
 
     def format_source_dict(self):
         source_arp_dict = dict()
@@ -46,13 +47,13 @@ class ARPInfo:
         source_arp_dict['network_type'] = self.network_type
         source_arp_dict['filter'] = ""
         source_arp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
-        source_arp_dict['tag'] = "arp_source"
         source_arp_dict['vif_names'] = []
 
         tunnel_ip = discovery.get_tunnel_ip(self.source_host_id, self.neutron)
         source_arp_dict['tunnel_ip'] = tunnel_ip
         source_arp_dict['vxlan_filter'] = "src %s and udp port (4789)" % (source_arp_dict['tunnel_ip'])
         source_arp_dict['tunnel_port'] = discovery.get_tunnel_port(self.source_host_id, source_arp_dict['tunnel_ip'], self.neutron)
+        source_arp_dict['tag'] = "arp_source %s" % source_arp_dict['tunnel_ip']
 
         return source_arp_dict
 
@@ -65,9 +66,11 @@ class ARPInfo:
 
         return inject_arp_dict
 
-
     def get_source_arp_dict(self):
         return self.source_arp_listen_dict
 
     def get_inject_arp_dict(self):
         return self.inject_arp_dict
+
+    def get_vxlan_host_dict(self):
+        return self.host_dict

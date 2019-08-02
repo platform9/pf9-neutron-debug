@@ -86,7 +86,10 @@ def get_sniff_vxlan_result(src_mac, phy_port,listeners, handler, tag, checker_ty
                 if (inner_ether.src == src_mac or inner_ether.dst == src_mac) and checker_type in inner_ether:
                     packet_type, src, dst = handler(str(inner_packet))
                     if packet_type is not None:
-                        data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
+                        if "arp" in tag:
+                            data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst, outer_ether[scapy.IP].dst])
+                        else:
+                            data[tag + ":" + vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
             else:
                 packet_type, src, dst = handler(str(packet[1]))
                 if packet_type is not None:

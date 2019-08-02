@@ -88,6 +88,18 @@ def get_tunnel_port(host_id, tunnel_ip, neutron):
                 if ip == tunnel_ip:
                     return port
 
+def get_vxlan_host_dict(vm_network_id, neutron):
+    host_dict = dict()
+    host_list = []
+    for port in neutron.list_ports()['ports']:
+        if port['network_id'] == vm_network_id and port['status'] == "ACTIVE" and port['binding:host_id'] not '':
+            host_list.append(port['binding:host_id'])
+    host_list = set(host_list)
+    for host in host_list:
+        host_dict[host] = get_tunnel_ip(host, neutron)
+    print host_dict
+    return host_dict
+
 # HOST Side
 def concat_vif_name(device_name, port_id):
     full_name = device_name + port_id
