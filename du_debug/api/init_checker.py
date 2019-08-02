@@ -3,9 +3,11 @@ sys.path.append("../")
 
 import arp_dynamic_info
 import dhcp_dynamic_info
-import dhcp_static_info
 import icmp_dynamic_info
 import init_neutron_client
+import logging
+import pdb
+import time
 
 neutron = init_neutron_client.make_neutron_object()
 
@@ -27,19 +29,16 @@ def run_arp_checker(source_vm, client_obj):
 
 def run_dhcp_checker(vm_name, client_obj):
 
-    error_code = dhcp_static_info.run_du_static_checks(vm_name, neutron)
-    if error_code:
-        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
-    print "HEARTBEAT tests look OK, ready to move on"
-
     local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
     message = client_obj.check_dnsmasq_process(local['vm info'], local['vm info']['host_id'])
     print message
+    logging.info(message)
     if "CODE 1" in message or "CODE 2" in message:
         sys.exit()
     for host in remote['dhcp remote hosts']:
         message = client_obj.check_dnsmasq_process(local['vm info'], host['host_id'])
         print message
+	logging.info(message)
         if "CODE 1" in message or "CODE 2" in message:
             sys.exit()
 

@@ -6,6 +6,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import importlib
 import init_checker
+import dhcp_static_info
 import du_rpc_handler
 import logging as logs
 import oslo_messaging
@@ -21,6 +22,11 @@ logs.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode =
 
 @app.route('/v1/single/<string:vm_name>', methods=['GET'])
 def single_vm_checker(vm_name):
+ 
+    error_code = dhcp_static_info.run_du_static_checks(vm_name, init_checker.neutron)
+    if error_code:
+        sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
+    print "HEARTBEAT tests look OK, ready to move on"
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
     arp_response_dict = init_checker.run_arp_checker(vm_name, client_obj)
