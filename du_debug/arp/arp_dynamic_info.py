@@ -25,6 +25,7 @@ class ARPInfo:
         if self.network_type == "vlan":
             self.source_arp_listen_dict = {'network_type':"vlan"}
 	    self.inject_arp_dict = {}
+	    self.host_dict = {}
         else:
             self.format_arp_dicts()
 
@@ -32,7 +33,7 @@ class ARPInfo:
 
         self.source_arp_listen_dict = self.format_source_dict()
         self.inject_arp_dict = self.format_inject_dict()
-        self.host_dict = discovery.get_vxlan_host_dict(self.network_id, self.neutron)
+        self.host_dict = discovery.get_vxlan_host_dict(self.network_id, self.neutron, self.source_host_id)
 
     def format_source_dict(self):
         source_arp_dict = dict()

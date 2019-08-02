@@ -88,11 +88,11 @@ def get_tunnel_port(host_id, tunnel_ip, neutron):
                 if ip == tunnel_ip:
                     return port
 
-def get_vxlan_host_dict(vm_network_id, neutron):
+def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
     host_dict = dict()
     host_list = []
     for port in neutron.list_ports()['ports']:
-        if port['network_id'] == vm_network_id and port['status'] == "ACTIVE" and port['binding:host_id'] not '':
+        if port['network_id'] == vm_network_id and port['status'] == "ACTIVE" and port['binding:host_id'] and port['binding:host_id'] != source_host_id:
             host_list.append(port['binding:host_id'])
     host_list = set(host_list)
     for host in host_list:
