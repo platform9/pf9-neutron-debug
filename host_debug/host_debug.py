@@ -52,7 +52,6 @@ class CheckerEndpoint(object):
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
-	print "HERE"
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
 	print "LOCAL HOST: " + message
 	return message

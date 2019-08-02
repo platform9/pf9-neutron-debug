@@ -36,9 +36,6 @@ logging.register_options(CONF)
 logging.set_defaults()
 LOG = logging.getLogger(__name__)
 
-
-stop_thread = False
-
 # Return Endpoint
 class GetHostDataEndpoint(object):
     target = oslo_messaging.Target(namespace='test', version='2.0')
@@ -55,13 +52,8 @@ class GetHostDataEndpoint(object):
     def get_message(self, ctx, message):
         logs.info(message)
         print message
-        if "CODE 0" in message or "CODE 1" in message:
-            stop_thread = True
-
 
 def main():
-
-    stop_thread = False
 
     CONF(sys.argv[1:])
 

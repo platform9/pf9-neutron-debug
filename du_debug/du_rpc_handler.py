@@ -38,7 +38,7 @@ class RPCClientObject:
     def local_host_recieve_dhcp_message(self, dhcp_dict):
         cctxt = self.client.prepare(server=dhcp_dict['vm info']['host_id'])
         local_dhcp_response = cctxt.call({}, 'init_dhcp', dhcp_d = dhcp_dict)
-        return local_host_recieve_dhcp_message
+        return local_dhcp_response
 
     def retrieve_remote_dhcp_data(self, remote):
         response_list = []
