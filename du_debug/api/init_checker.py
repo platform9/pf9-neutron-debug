@@ -5,6 +5,7 @@ import arp_dynamic_info
 import dhcp_dynamic_info
 import icmp_dynamic_info
 import init_neutron_client
+import fip_dynamic_info
 import logging
 import pdb
 import time
@@ -65,6 +66,27 @@ def run_icmp_checker(source_vm, dest_vm, client_obj):
 
     return source_response_dict, dest_response_dict
 
+def run_fip_checker(vm_name, client_obj):
+
+    listen_fip_dict, inject_fip_dict = get_fip_info(vm_name)
+
+    print listen_fip_dict['ns_vif_names']
+    print ""
+    print listen_fip_dict['vif_names']
+
+    client_obj.listen_on_host(listen_fip_dict)
+    client_obj.listen_ns_on_host(listen_fip_dict)
+    time.sleep(3)
+    client_obj.source_icmp_inject(inject_fip_dict)
+    time.sleep(3)
+    fip_response_dict = client_obj.retrieve_listener_data(listen_fip_dict)
+    fip_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_fip_dict)
+
+    fip_response_dict.update(fip_ns_response_dict)
+
+    return fip_response_dict
+
+
 def get_arp_info(vm_name):
 
     arp_info = arp_dynamic_info.ARPInfo(vm_name, neutron)
@@ -92,8 +114,6 @@ def analyze_arp_data(host_dict, arp_response_dict):
         code = 1
     return message, code
 
-
-
 def get_icmp_info(source_vm, dest_vm):
 
     icmp_info = icmp_dynamic_info.ICMPInfo(source_vm, dest_vm, neutron)
@@ -101,3 +121,10 @@ def get_icmp_info(source_vm, dest_vm):
     dest_icmp_dict = icmp_info.get_dest_icmp_dict()
     inject_icmp_dict = icmp_info.get_inject_icmp_dict()
     return source_icmp_dict, dest_icmp_dict, inject_icmp_dict
+
+def get_fip_info(vm_name):
+
+    fip_info = fip_dynamic_info.FIPInfo(vm_name, neutron)
+    listen_fip_dict = fip_info.get_listen_fip_dict()
+    inject_fip_dict = fip_info.get_inject_fip_dict()
+    return listen_fip_dict, inject_fip_dict

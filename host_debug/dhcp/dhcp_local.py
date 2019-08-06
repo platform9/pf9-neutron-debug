@@ -4,7 +4,7 @@ sys.path.append('../')
 
 import discovery
 import dhcp_port
-import phy_int
+import phy_interface
 import pcap_driver
 import scapy_driver
 import set_listeners
@@ -30,7 +30,7 @@ def init_dhcp_check(dhcp_dict):
     vif_names = discovery.get_vif_names(port_id)
     src_mac = dhcp_dict['vm info']['mac_address']
     if dhcp_dict['vm info']['network_type'] == 'vlan':
-        phy_port = phy_int.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
+        phy_port = phy_interface.get_phy_interface(dhcp_dict['vm info']['bridge_name'])
     elif dhcp_dict['vm info']['network_type'] == 'vxlan':
         phy_port = dhcp_dict['vm info']['tunnel_port']
     vif_names["local nic:" + phy_port] = phy_port

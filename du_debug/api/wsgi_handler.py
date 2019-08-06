@@ -43,6 +43,15 @@ def single_vm_checker(vm_name):
     resp.headers['Packet Data'] = 'THERE'
     return resp
 
+@app.route('/v1/single/fip/<string:vm_name>', methods=['GET'])
+def fip_checker(vm_name):
+
+    client_obj = du_rpc_handler.RPCClientObject(CONF)
+    fip_response_dict = init_checker.run_fip_checker(vm_name, client_obj)
+
+    resp = make_response(jsonify(fip_response_dict), 200)
+    return resp
+
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
 

@@ -61,6 +61,11 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=listen_dict['host_id'])
         cctxt.cast({}, 'set_port_listeners', listener_dict = listen_dict)
 
+    def listen_ns_on_host(self, listen_dict):
+
+        cctxt = self.client.prepare(server=listen_dict['host_id'])
+        cctxt.cast({}, 'set_ns_port_listeners', listener_dict = listen_dict)
+
     def source_icmp_inject(self, inject_dict):
 
         cctxt = self.client.prepare(server=inject_dict['host_id'])
@@ -75,4 +80,10 @@ class RPCClientObject:
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])
         response_dict = cctxt.call({}, 'send_listener_data', listener_dict = listen_dict)
+        return response_dict
+
+    def retrieve_ns_listener_data(self, listen_dict):
+
+        cctxt = self.client.prepare(server=listen_dict['host_id'])
+        response_dict = cctxt.call({}, 'send_ns_listener_data', listener_dict = listen_dict)
         return response_dict

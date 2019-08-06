@@ -4,7 +4,7 @@ sys.path.append('../')
 
 import dhcp_port
 import discovery
-import phy_int
+import phy_interface
 import pcap_driver
 import scapy_driver
 import set_listeners
@@ -33,7 +33,7 @@ class DHCPRemote:
         src_mac = self.dhcp_dict['src_mac_address']
 
         if self.dhcp_dict['network_type'] == 'vlan':
-            phy_port = phy_int.get_phy_interface(self.dhcp_dict['bridge_name'])
+            phy_port = phy_interface.get_phy_interface(self.dhcp_dict['bridge_name'])
         elif self.dhcp_dict['network_type'] == 'vxlan':
             phy_port = self.dhcp_dict['tunnel_port']
         vif_names["remote nic:" + phy_port] = phy_port

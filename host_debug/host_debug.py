@@ -15,6 +15,7 @@ import dnsmasq_checker
 import scapy_driver
 import pcap_driver
 import set_listeners
+import set_ns_listeners
 
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -63,6 +64,12 @@ class CheckerEndpoint(object):
         self.set_listen_obj.init_listeners()
         time.sleep(2)
 
+    def set_ns_port_listeners(self, ctx, listener_dict):
+
+        self.set_ns_listen_obj = set_ns_listeners.SetNsListener(listener_dict)
+        self.set_ns_listen_obj.init_listeners()
+        #time.sleep(2)
+
     def inject_icmp_packet(self, ctx, inject_dict):
 
         self.scapy.send_icmp_on_interface(inject_dict['inject_port'], inject_dict['src_mac_address'], inject_dict['dest_mac_address'], inject_dict['src_ip_address'], inject_dict['dest_ip_address'], inject_dict['payload'])
@@ -76,6 +83,12 @@ class CheckerEndpoint(object):
     def send_listener_data(self, ctx, listener_dict):
 
         checker_data = self.set_listen_obj.collect_data()
+        log_to_du(checker_data)
+        return checker_data
+
+    def send_ns_listener_data(self, ctx, listener_dict):
+
+        checker_data = self.set_ns_listen_obj.collect_data()
         log_to_du(checker_data)
         return checker_data
 

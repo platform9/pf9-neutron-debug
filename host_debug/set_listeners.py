@@ -2,7 +2,7 @@ import sys
 sys.path.append('../common/')
 
 import discovery
-import phy_int
+import phy_interface
 import pcap_driver
 import scapy_driver
 import time
@@ -20,43 +20,36 @@ class SetListener:
         pcap = pcap_driver.PcapDriver()
 
         vif_names = self.listener_dict['vif_names']
-        vif_names = self.vif_list_to_dict(vif_names)
 
         if self.listener_dict['network_type'] == "vxlan":
             phy_port = self.listener_dict['tunnel_port']
         else:
-            phy_port = phy_int.get_phy_interface(self.listener_dict['bridge_name'])
-        vif_names["nic:" + phy_port] = phy_port
+            phy_port = phy_interface.get_phy_interface(self.listener_dict['bridge_name'])
 
-        filter = self.listener_dict['filter']
+        vif_names.append({phy_port: {'is_ns':"None", 'port_type':"nic", 'filter': self.listener_dict['nic_filter']}})
 
         listeners = []
-        for k,v in vif_names.items():
-            if "nic" in k and self.listener_dict['network_type'] == 'vxlan':
-                listeners.append(pcap.setup_listener(v, self.listener_dict['vxlan_filter']))
-            else:
-                listeners.append(pcap.setup_listener(v, filter))
+        for vif in vif_names:
+	    for vif_name, vif_dict in vif.items():
+                if "nic" in vif_dict["port_type"] and self.listener_dict['network_type'] == 'vxlan':
+                   listeners.append(pcap.setup_listener(vif_name, self.listener_dict['vxlan_filter']))
+                elif "nic" in vif_dict["port_type"]:
+                   listeners.append(pcap.setup_listener(vif_name, self.listener_dict['nic_filter']))
+                else:
+                   listeners.append(pcap.setup_listener(vif_name, vif_dict['filter']))
 
         self.listeners = listeners
         self.phy_port = phy_port
 
+	print listeners
         return listeners
 
-    def vif_list_to_dict(self, vif_names):
-
-        vif_dict = dict()
-
-        for vif in vif_names:
-    	   vif_dict[vif[vif.keys()[0]]['port_type']] = vif.keys()[0]
-
-        return vif_dict
-
     def collect_data(self):
-        if self.listener_dict['checker_type'] == "ICMP":
-            if self.listener_dict['network_type'] == "vlan":
-                data = get_sniff_result(self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'])
-            elif self.listener_dict['network_type'] == "vxlan":
+        if self.listener_dict['checker_type'] == "ICMP" or self.listener_dict['checker_type'] == "FIP":
+            if self.listener_dict['network_type'] == "vxlan":
                 data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
+            else:
+                data = get_sniff_result(self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'])
         elif self.listener_dict['checker_type'] == "ARP":
             data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_arp_op, self.listener_dict['tag'], self.listener_dict['checker_type'])
         return data

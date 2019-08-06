@@ -45,7 +45,7 @@ class ICMPInfo:
         source_icmp_dict['port_id'] = self.source_port_dict['id']
         source_icmp_dict['network_label'] = self.network_label
         source_icmp_dict['network_type'] = self.network_type
-        source_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
+        source_icmp_dict['nic_filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
         source_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
         source_icmp_dict['tag'] = "source"
         source_icmp_dict['vif_names'] = []
@@ -63,7 +63,7 @@ class ICMPInfo:
         for port_type, vif_name in vif_names.items():
             vif = dict()
             vif[vif_name] = dict()
-            vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
+            vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
             vif[vif_name]['is_ns'] = "None"
 	    vif[vif_name]['port_type'] = port_type
             source_icmp_dict['vif_names'].append(vif)
@@ -83,7 +83,7 @@ class ICMPInfo:
         dest_icmp_dict['port_id'] = self.dest_port_dict['id']
         dest_icmp_dict['network_label'] = self.network_label
         dest_icmp_dict['network_type'] = self.network_type
-        dest_icmp_dict['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
+        dest_icmp_dict['nic_filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
         dest_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.dest_host_id, self.neutron)
         dest_icmp_dict['tag'] = "destination"
         dest_icmp_dict['vif_names'] = []
@@ -101,7 +101,7 @@ class ICMPInfo:
         for port_type, vif_name in vif_names.items():
             vif = dict()
             vif[vif_name] = dict()
-            vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) "
+            vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
             vif[vif_name]['is_ns'] = "None"
 	    vif[vif_name]['port_type'] = port_type
             dest_icmp_dict['vif_names'].append(vif)

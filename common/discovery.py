@@ -100,10 +100,42 @@ def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
     print host_dict
     return host_dict
 
+
+def get_snat_info(fixed_ip_address ,neutron):
+    for float_ip in neutron.list_floatingips()['floatingips']:
+        if fixed_ip_address == float_ip['fixed_ip_address']:
+            return float_ip['router_id'], float_ip['floating_network_id'], float_ip['floating_ip_address']
+
+def get_qr_port(router_id, neutron):
+    for port in neutron.list_ports()['ports']:
+        if port['device_id'] == router_id and port['device_owner'] == "network:router_interface_distributed":
+            return port['id'], port['mac_address']
+
+def get_fg_port(floating_network_id, host_id, neutron):
+    for port in neutron.list_ports()['ports']:
+        if port['network_id'] == floating_network_id and port['binding:host_id'] == host_id and port['device_owner'] == "network:floatingip_agent_gateway":
+            return port['id']
+
 # HOST Side
 def concat_vif_name(device_name, port_id):
     full_name = device_name + port_id
     return full_name[:VIF_PREFIX_LEN]
+
+def get_fip_interfaces(router_id, floating_network_id, qr_port, fg_port):
+
+    qr_device = concat_vif_name("qr-", qr_port)
+    rfp_device = concat_vif_name("rfp-", router_id)
+    fpr_device = concat_vif_name("fpr-", router_id)
+    fg_device = concat_vif_name("fg-", fg_port)
+
+    qr_ns = "qrouter-" + router_id
+    rfp_ns = "qrouter-" + router_id
+    fpr_ns = "fip-" + floating_network_id
+    fg_ns = "fip-" + floating_network_id
+
+    fip_interfaces = {qr_device:qr_ns, rfp_device:rfp_ns, fpr_device:fpr_ns, fg_device:fg_ns}
+
+    return fip_interfaces
 
 def get_vif_names(port_id):
     vif_names = {}
