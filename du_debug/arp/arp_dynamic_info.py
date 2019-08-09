@@ -46,11 +46,7 @@ class ARPInfo:
         source_arp_dict['port_id'] = self.source_port_dict['id']
         source_arp_dict['network_label'] = self.network_label
         source_arp_dict['network_type'] = self.network_type
-<<<<<<< HEAD
         source_arp_dict['nic_filter'] = ""
-=======
-        source_arp_dict['filter'] = ""
->>>>>>> 0d26d143e58de51188334d43635a8cebbfa75cdd
         source_arp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
         source_arp_dict['vif_names'] = []
 

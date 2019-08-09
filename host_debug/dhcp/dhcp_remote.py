@@ -33,11 +33,7 @@ class DHCPRemote:
         src_mac = self.dhcp_dict['src_mac_address']
 
         if self.dhcp_dict['network_type'] == 'vlan':
-<<<<<<< HEAD
             phy_port = phy_interface.get_phy_interface(self.dhcp_dict['bridge_name'])
-=======
-            phy_port = phy_int.get_phy_interface(self.dhcp_dict['bridge_name'])
->>>>>>> 0d26d143e58de51188334d43635a8cebbfa75cdd
         elif self.dhcp_dict['network_type'] == 'vxlan':
             phy_port = self.dhcp_dict['tunnel_port']
         vif_names["remote nic:" + phy_port] = phy_port

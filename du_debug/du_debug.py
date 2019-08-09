@@ -6,10 +6,7 @@ sys.path.append('./dhcp/')
 sys.path.append('./icmp/')
 sys.path.append('./api')
 sys.path.append('./arp')
-<<<<<<< HEAD
 sys.path.append('./fip')
-=======
->>>>>>> 0d26d143e58de51188334d43635a8cebbfa75cdd
 
 import time
 import oslo_messaging

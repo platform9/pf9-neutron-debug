@@ -100,6 +100,7 @@ def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
     print host_dict
     return host_dict
 
+
 def get_snat_info(fixed_ip_address ,neutron):
     for float_ip in neutron.list_floatingips()['floatingips']:
         if fixed_ip_address == float_ip['fixed_ip_address']:
