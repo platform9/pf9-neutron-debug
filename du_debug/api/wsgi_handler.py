@@ -28,6 +28,7 @@ def single_vm_checker(vm_name):
         sys.exit("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error")
     print "HEARTBEAT tests look OK, ready to move on"
 
+<<<<<<< HEAD
     client_obj = du_rpc_handler.RPCClientObject(CONF)
     arp_response_dict, message, code = init_checker.run_arp_checker(vm_name, client_obj)
     if code:
@@ -50,6 +51,21 @@ def fip_checker(vm_name):
     fip_response_dict = init_checker.run_fip_checker(vm_name, client_obj)
 
     resp = make_response(jsonify(fip_response_dict), 200)
+=======
+    client_obj = du_rpc_handler.RPCClientObject(CONF)
+    arp_response_dict, message, code = init_checker.run_arp_checker(vm_name, client_obj)
+    if code:
+        return Response(message, status=200)
+
+    local_dhcp_response_dict, remote_dhcp_response_list = init_checker.run_dhcp_checker(vm_name, client_obj)
+
+    response_list = remote_dhcp_response_list
+    response_list.append(local_dhcp_response_dict)
+    response_list.append(arp_response_dict)
+
+    resp = make_response(jsonify(response_list), 200)
+    resp.headers['Packet Data'] = 'THERE'
+>>>>>>> 0d26d143e58de51188334d43635a8cebbfa75cdd
     return resp
 
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])

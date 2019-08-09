@@ -85,12 +85,15 @@ class CheckerEndpoint(object):
         checker_data = self.set_listen_obj.collect_data()
         log_to_du(checker_data)
         return checker_data
+<<<<<<< HEAD
 
     def send_ns_listener_data(self, ctx, listener_dict):
 
         checker_data = self.set_ns_listen_obj.collect_data()
         log_to_du(checker_data)
         return checker_data
+=======
+>>>>>>> 0d26d143e58de51188334d43635a8cebbfa75cdd
 
 def main():
 
