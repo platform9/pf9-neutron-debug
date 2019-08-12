@@ -17,7 +17,7 @@ class FIPInfo:
         self.source_port_dict = discovery.get_port_dict(self.vm_name, self.neutron)
         self.fixed_ip_address = self.source_port_dict['fixed_ips'][0]['ip_address']
         self.network_id = self.source_port_dict['network_id']
-        self.router_id, self.floating_network_id, self.floating_ip = discovery.get_snat_info(self.fixed_ip_address, self.neutron)
+        self.router_id, self.floating_network_id, self.floating_ip = discovery.get_fip_info(self.fixed_ip_address, self.neutron)
         self.source_host_id = self.source_port_dict['binding:host_id']
         self.network_label = discovery.get_network_label(self.floating_network_id, self.neutron)
 	self.network_type = discovery.get_network_type(self.floating_network_id, self.neutron)
@@ -40,8 +40,8 @@ class FIPInfo:
         listen_fip_dict['dest_ip_address'] = "8.8.8.8"
         listen_fip_dict['host_id'] = self.source_host_id
         listen_fip_dict['port_id'] = self.source_port_dict['id']
-        listen_fip_dict['qr_port'], listen_fip_dict['dest_mac_address'] = discovery.get_qr_port(self.router_id, self.neutron)
-	listen_fip_dict['fg_port'] = discovery.get_fg_port(self.floating_network_id, self.source_host_id, self.neutron)
+        listen_fip_dict['qr_port_id'], listen_fip_dict['dest_mac_address'] = discovery.get_qr_port(self.router_id, self.neutron)
+	listen_fip_dict['fg_port_id'] = discovery.get_fg_port(self.floating_network_id, self.source_host_id, self.neutron)
         listen_fip_dict['network_label'] = self.network_label
 	listen_fip_dict['network_type'] = self.network_type
         listen_fip_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.floating_ip, listen_fip_dict['dest_ip_address'], listen_fip_dict['dest_ip_address'], self.floating_ip)
@@ -59,7 +59,7 @@ class FIPInfo:
 	    vif[vif_name]['port_type'] = port_type
             listen_fip_dict['vif_names'].append(vif)
 
-        vif_names = discovery.get_fip_interfaces(self.router_id, self.floating_network_id, listen_fip_dict['qr_port'], listen_fip_dict['fg_port'])
+        vif_names = discovery.get_fip_interfaces(self.router_id, self.floating_network_id, listen_fip_dict['qr_port_id'], listen_fip_dict['fg_port_id'])
         for vif_name, netns in vif_names.items():
             vif = dict()
             vif[vif_name] = dict()

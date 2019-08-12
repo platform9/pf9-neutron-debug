@@ -52,6 +52,15 @@ def fip_checker(vm_name):
     resp = make_response(jsonify(fip_response_dict), 200)
     return resp
 
+@app.route('/v1/single/snat/<string:vm_name>', methods=['GET'])
+def snat_checker(vm_name):
+
+    client_obj = du_rpc_handler.RPCClientObject(CONF)
+    snat_response_dict = init_checker.run_snat_checker(vm_name, client_obj)
+
+    resp = make_response(jsonify(snat_response_dict), 200)
+    return resp
+
 @app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
 def paired_vms_checker(source_vm, dest_vm):
 

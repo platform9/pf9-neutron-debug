@@ -100,8 +100,7 @@ def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
     print host_dict
     return host_dict
 
-
-def get_snat_info(fixed_ip_address ,neutron):
+def get_fip_info(fixed_ip_address ,neutron):
     for float_ip in neutron.list_floatingips()['floatingips']:
         if fixed_ip_address == float_ip['fixed_ip_address']:
             return float_ip['router_id'], float_ip['floating_network_id'], float_ip['floating_ip_address']
@@ -115,6 +114,16 @@ def get_fg_port(floating_network_id, host_id, neutron):
     for port in neutron.list_ports()['ports']:
         if port['network_id'] == floating_network_id and port['binding:host_id'] == host_id and port['device_owner'] == "network:floatingip_agent_gateway":
             return port['id']
+
+def get_sg_port(tenant_network_id, neutron):
+    for port in neutron.list_ports()['ports']:
+        if port['network_id'] == tenant_network_id and port['device_owner'] == "network:router_centralized_snat":
+            return port
+
+def get_qg_port(router_id, neutron):
+    for port in neutron.list_ports()['ports']:
+        if port['device_id'] == router_id and port['device_id'] == "network:router_gateway":
+            return port
 
 # HOST Side
 def concat_vif_name(device_name, port_id):
