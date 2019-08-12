@@ -6,6 +6,7 @@ import dhcp_dynamic_info
 import icmp_dynamic_info
 import init_neutron_client
 import fip_dynamic_info
+import snat_dynamic_info
 import logging
 import pdb
 import time
@@ -86,6 +87,48 @@ def run_fip_checker(vm_name, client_obj):
 
     return fip_response_dict
 
+def run_snat_checker(vm_name, client_obj):
+
+    listen_local_snat_dict, listen_remote_snat_dict, inject_snat_dict, flag = get_snat_info(vm_name)
+
+    print "LOCAL SNAT"
+    print listen_local_snat_dict
+    print "REMOTE SNAT"
+    print listen_remote_snat_dict
+
+    snat_resp = dict()   
+ 
+    if flag == "local":
+        client_obj.listen_on_host(listen_local_snat_dict)
+        client_obj.listen_ns_on_host(listen_local_snat_dict)
+        time.sleep(3)
+        client_obj.source_icmp_inject(inject_snat_dict)
+        time.sleep(3)
+        snat_local_response_dict = client_obj.retrieve_listener_data(listen_local_snat_dict)
+        snat_local_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_local_snat_dict)
+
+        snat_resp.update(snat_local_response_dict)
+	snat_resp.update(snat_local_ns_response_dict)
+    elif flag == "remote":
+        client_obj.listen_on_host(listen_local_snat_dict)
+        client_obj.listen_ns_on_host(listen_local_snat_dict)
+        client_obj.listen_on_host(listen_remote_snat_dict)
+        client_obj.listen_ns_on_host(listen_remote_snat_dict)
+        time.sleep(2)
+        client_obj.source_icmp_inject(inject_snat_dict)
+        time.sleep(1)
+        snat_local_response_dict = client_obj.retrieve_listener_data(listen_local_snat_dict)
+        snat_local_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_local_snat_dict)
+        snat_remote_response_dict = client_obj.retrieve_listener_data(listen_remote_snat_dict)
+        snat_remote_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_remote_snat_dict)
+	
+	snat_resp.update(snat_local_response_dict)
+	snat_resp.update(snat_local_ns_response_dict)
+	snat_resp.update(snat_remote_response_dict)
+	snat_resp.update(snat_remote_ns_response_dict)
+	
+    return snat_resp
+
 
 def get_arp_info(vm_name):
 
@@ -128,3 +171,13 @@ def get_fip_info(vm_name):
     listen_fip_dict = fip_info.get_listen_fip_dict()
     inject_fip_dict = fip_info.get_inject_fip_dict()
     return listen_fip_dict, inject_fip_dict
+
+def get_snat_info(vm_name):
+
+    snat_info = snat_dynamic_info.SNATInfo(vm_name, neutron)
+    listen_local_snat_dict = snat_info.get_local_dict()
+    listen_remote_snat_dict = snat_info.get_remote_dict()
+    inject_snat_dict = snat_info.get_inject_dict()
+    flag = snat_info.get_flag()
+
+    return listen_local_snat_dict, listen_remote_snat_dict, inject_snat_dict, flag

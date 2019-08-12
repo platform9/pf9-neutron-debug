@@ -68,7 +68,7 @@ class CheckerEndpoint(object):
 
         self.set_ns_listen_obj = set_ns_listeners.SetNsListener(listener_dict)
         self.set_ns_listen_obj.init_listeners()
-        #time.sleep(2)
+        time.sleep(2)
 
     def inject_icmp_packet(self, ctx, inject_dict):
 

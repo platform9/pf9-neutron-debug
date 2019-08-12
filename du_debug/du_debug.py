@@ -7,6 +7,7 @@ sys.path.append('./icmp/')
 sys.path.append('./api')
 sys.path.append('./arp')
 sys.path.append('./fip')
+sys.path.append('./snat')
 
 import time
 import oslo_messaging

@@ -28,24 +28,31 @@ class SetListener:
 
         vif_names.append({phy_port: {'is_ns':"None", 'port_type':"nic", 'filter': self.listener_dict['nic_filter']}})
 
+	
+	if "bridge_name_remote_ext" in self.listener_dict:
+	   ext_phy_port = phy_interface.get_phy_interface(self.listener_dict['bridge_name_remote_ext'])
+	   vif_names.append({ext_phy_port: {'is_ns':"None", 'port_type':"ext_nic", 'filter': self.listener_dict['ext_nic_filter']}})
+	   print vif_names
+
         listeners = []
         for vif in vif_names:
 	    for vif_name, vif_dict in vif.items():
-                if "nic" in vif_dict["port_type"] and self.listener_dict['network_type'] == 'vxlan':
+                if "nic" == vif_dict["port_type"] and self.listener_dict['network_type'] == 'vxlan':
                    listeners.append(pcap.setup_listener(vif_name, self.listener_dict['vxlan_filter']))
-                elif "nic" in vif_dict["port_type"]:
+                elif "nic" == vif_dict["port_type"]:
                    listeners.append(pcap.setup_listener(vif_name, self.listener_dict['nic_filter']))
+		elif "ext_nic" == vif_dict["port_type"]:
+		   listeners.append(pcap.setup_listener(vif_name, self.listener_dict['ext_nic_filter']))
                 else:
                    listeners.append(pcap.setup_listener(vif_name, vif_dict['filter']))
 
         self.listeners = listeners
         self.phy_port = phy_port
 
-	print listeners
         return listeners
 
     def collect_data(self):
-        if self.listener_dict['checker_type'] == "ICMP" or self.listener_dict['checker_type'] == "FIP":
+        if self.listener_dict['checker_type'] == "ICMP" or self.listener_dict['checker_type'] == "FIP" or self.listener_dict['checker_type'] == "SNAT":
             if self.listener_dict['network_type'] == "vxlan":
                 data = get_sniff_vxlan_result(self.listener_dict['src_mac_address'], self.phy_port, self.listeners, self.scapy.get_icmp_mt, self.listener_dict['tag'], self.listener_dict['checker_type'])
             else:

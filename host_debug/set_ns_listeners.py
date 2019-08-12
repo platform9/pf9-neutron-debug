@@ -44,7 +44,7 @@ class SetNsListener:
 
                 data[tag + ":" + vif_name] = []
                 for p in packets:
-                    if self.listener_dict['checker_type'] == "FIP":
+                    if self.listener_dict['checker_type'] == "FIP" or self.listener_dict['checker_type'] == "SNAT":
                         packet_type, src, dst = p[scapy.ICMP].type, p.src, p.dst
 			if packet_type in ICMP_MESSAGE_TYPE:
 			   message_type = ICMP_MESSAGE_TYPE[packet_type]
