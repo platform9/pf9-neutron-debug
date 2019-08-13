@@ -24,7 +24,7 @@ def analyze_dnsmasq(dhcp_dict):
     with open("/var/opt/pf9/neutron/dhcp/%s/host" % (dhcp_dict['network_id'])) as file:
         output = file.readlines()
     for line in output:
-        if dhcp_dict['mac_address'] in line and dhcp_dict['ip_address'] in line:
+        if dhcp_dict['src_mac_address'] in line and dhcp_dict['ip_address'] in line:
             instance_flag = True
             break
 

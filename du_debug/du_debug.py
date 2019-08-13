@@ -46,10 +46,10 @@ class GetHostDataEndpoint(object):
         self.server = server
 	self.log_info = log_data.LogData()
 
-    def recieve_dict(self, ctx, d):
+    def recieve_dict(self, ctx, data, info):
         print "_______________RETURNED JSON___________________"
-        print d
-        self.log_info.log_data(d)
+        print data
+        self.log_info.log_data(data, info)
 
     def get_message(self, ctx, message):
         logs.info(message)

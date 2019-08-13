@@ -43,6 +43,7 @@ class SNATInfo:
 
         local_listen_dict = dict()
         local_listen_dict['checker_type'] = "SNAT"
+        local_listen_dict['packet_type'] = "ICMP"
         local_listen_dict['vm_name'] = self.vm_name
         local_listen_dict['src_ip_address'] = self.fixed_ip_address
         local_listen_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -54,9 +55,10 @@ class SNATInfo:
 	local_listen_dict['network_type'] = discovery.get_network_type(self.external_network_id, self.neutron)
         local_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.snat_external_ip, self.dest_ip_address, self.dest_ip_address, self.snat_external_ip)
         local_listen_dict['bridge_name'] = discovery.get_bridge_name(local_listen_dict['network_label'], self.source_host_id, self.neutron)
-        local_listen_dict['tag'] = "source"
+        local_listen_dict['tag'] = "VM SOURCE"
         local_listen_dict['vif_names'] = self.vif_names
         local_listen_dict['ns_vif_names'] = self.ns_vif_names
+        local_listen_dict['snat_host'] = "local"
 
         return local_listen_dict
 
@@ -64,6 +66,7 @@ class SNATInfo:
 
         local_listen_dict = dict()
         local_listen_dict['checker_type'] = "SNAT"
+        local_listen_dict['packet_type'] = "ICMP"
         local_listen_dict['vm_name'] = self.vm_name
         local_listen_dict['src_ip_address'] = self.fixed_ip_address
         local_listen_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -74,6 +77,7 @@ class SNATInfo:
         local_listen_dict['network_label'] = discovery.get_network_label(self.tenant_network_id, self.neutron)
 	local_listen_dict['network_type'] = discovery.get_network_type(self.tenant_network_id, self.neutron)
         local_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.fixed_ip_address, self.dest_ip_address, self.dest_ip_address, self.fixed_ip_address)
+        local_listen_dict['snat_host'] = "remote"
 
         tunnel_ip = discovery.get_tunnel_ip(self.source_host_id, self.neutron)
         local_listen_dict['tunnel_ip'] = tunnel_ip
@@ -84,10 +88,10 @@ class SNATInfo:
             local_listen_dict['tunnel_port'] = "None"
 
         local_listen_dict['bridge_name'] = discovery.get_bridge_name(local_listen_dict['network_label'], self.source_host_id, self.neutron)
-        local_listen_dict['tag'] = "source"
+        local_listen_dict['tag'] = "VM SOURCE"
         local_listen_dict['vif_names'] = self.vif_names
         local_listen_dict['ns_vif_names'] = []
-        vif_buffer= self.ns_vif_names
+        vif_buffer = self.ns_vif_names
         for vif in vif_buffer:
             for vif_name in vif.keys():
                 if "qr" in vif_name:
@@ -97,6 +101,7 @@ class SNATInfo:
 
         remote_listen_dict = dict()
         remote_listen_dict['checker_type'] = "SNAT"
+        remote_listen_dict['packet_type'] = "ICMP"
         remote_listen_dict['vm_name'] = self.vm_name
         remote_listen_dict['src_ip_address'] = self.fixed_ip_address
         remote_listen_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -121,9 +126,14 @@ class SNATInfo:
 
         remote_listen_dict['bridge_name'] = discovery.get_bridge_name(remote_listen_dict['network_label'], self.snat_host_id, self.neutron)
         remote_listen_dict['bridge_name_remote_ext'] = discovery.get_bridge_name(remote_listen_dict['network_label_remote_ext'], self.snat_host_id, self.neutron)
-        remote_listen_dict['tag'] = "dest"
+        remote_listen_dict['tag'] = "SNAT NS"
         remote_listen_dict['vif_names'] = []
-        remote_listen_dict['ns_vif_names'] = self.ns_vif_names
+        remote_listen_dict['ns_vif_names'] = []
+        for vif in vif_buffer:
+            for vif_name in vif.keys():
+                if "qg" in vif_name or "sg" in vif_name:
+                    remote_listen_dict['ns_vif_names'].append(vif)
+                    break
 
         return local_listen_dict, remote_listen_dict
 

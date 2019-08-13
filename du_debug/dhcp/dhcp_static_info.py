@@ -6,8 +6,10 @@ import os
 import init_neutron_client
 import discovery
 import logging
+import coloredlogs
 
-logging.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+#logger.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logger.INFO)
+logger = logging.getLogger("main_logger")
 
 def run_du_static_checks(vm_name, neutron):
 
@@ -36,16 +38,16 @@ def run_du_static_checks(vm_name, neutron):
 def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
 
     if vm_host_code == 1:
-        logging.info("VM HOST is down, unable to run DHCP traffic tests")
+        logger.info("VM HOST is down, unable to run DHCP traffic tests")
         return 1
     if vm_code == 1:
-        logging.info("VM Port is down, unable to run DHCP traffic tests")
+        logger.info("VM Port is down, unable to run DHCP traffic tests")
         return 1
 
     dhcp_host_error = 0
     for i_d,code in host_error_dict.items():
         if code == 1:
-            logging.info("DHCP HOST %s is down, unable to run DHCP traffic tests" % (i_d))
+            logger.info("DHCP HOST %s is down, unable to run DHCP traffic tests" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1
@@ -53,10 +55,10 @@ def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
     dhcp_server_error = 0
     for i_d,code in dhcp_error_dict.items():
         if code == 1:
-            logging.info("DHCP SERVER Port %s is down, unable to run DHCP traffic tests" % (i_d))
+            logger.info("DHCP SERVER Port %s is down, unable to run DHCP traffic tests" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1
 
-    logging.info("HEARTBEAT tests look OK, ready to move on")
+    logger.info("HEARTBEAT tests look OK, ready to move on")
     return 0

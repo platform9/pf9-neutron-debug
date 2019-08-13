@@ -20,6 +20,8 @@ class ICMPInfo:
         self.network_id = self.source_port_dict['network_id']
         self.source_host_id = self.source_port_dict['binding:host_id']
         self.dest_host_id = self.dest_port_dict['binding:host_id']
+        self.same_host = (self.source_host_id == self.dest_host_id)
+
         self.network_label = discovery.get_network_label(self.network_id, self.neutron)
         self.network_type = discovery.get_network_type(self.network_id, self.neutron)
 
@@ -36,7 +38,9 @@ class ICMPInfo:
     def format_source_dict(self):
         source_icmp_dict = dict()
         source_icmp_dict['checker_type'] = "ICMP"
+        source_icmp_dict['packet_type'] = "ICMP"
         source_icmp_dict['vm_name'] = self.source_vm
+        source_icmp_dict['same_host'] = self.same_host
         source_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         source_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']
         source_icmp_dict['dest_ip_address'] = self.dest_port_dict['fixed_ips'][0]['ip_address']
@@ -47,8 +51,9 @@ class ICMPInfo:
         source_icmp_dict['network_type'] = self.network_type
         source_icmp_dict['nic_filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
         source_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
-        source_icmp_dict['tag'] = "source"
+        source_icmp_dict['tag'] = "SOURCE"
         source_icmp_dict['vif_names'] = []
+        source_icmp_dict['path_type'] = "bidirectional"
 
         tunnel_ip = discovery.get_tunnel_ip(self.source_host_id, self.neutron)
         source_icmp_dict['tunnel_ip'] = tunnel_ip
@@ -74,7 +79,9 @@ class ICMPInfo:
 
         dest_icmp_dict = dict()
         dest_icmp_dict['checker_type'] = "ICMP"
+        dest_icmp_dict['packet_type'] = "ICMP"
         dest_icmp_dict['vm_name'] = self.dest_vm
+        dest_icmp_dict['same_host'] = self.same_host
         dest_icmp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         dest_icmp_dict['src_mac_address'] = self.source_port_dict['mac_address']
         dest_icmp_dict['dest_ip_address'] = self.dest_port_dict['fixed_ips'][0]['ip_address']
@@ -85,8 +92,9 @@ class ICMPInfo:
         dest_icmp_dict['network_type'] = self.network_type
         dest_icmp_dict['nic_filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
         dest_icmp_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.dest_host_id, self.neutron)
-        dest_icmp_dict['tag'] = "destination"
+        dest_icmp_dict['tag'] = "DESTINATION"
         dest_icmp_dict['vif_names'] = []
+        dest_icmp_dict['path_type'] = "bidirectional"
 
         tunnel_ip = discovery.get_tunnel_ip(self.dest_host_id, self.neutron)
         dest_icmp_dict['tunnel_ip'] = tunnel_ip

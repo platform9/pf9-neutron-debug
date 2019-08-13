@@ -20,8 +20,8 @@ app = Flask(__name__)
 oslo_messaging.set_transport_defaults('myexchange')
 logs.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 
-@app.route('/v1/single/<string:vm_name>', methods=['GET'])
-def single_vm_checker(vm_name):
+@app.route('/v1/single/dhcp/<string:vm_name>', methods=['GET'])
+def dhcp_checker(vm_name):
 
     error_code = dhcp_static_info.run_du_static_checks(vm_name, init_checker.neutron)
     if error_code:
@@ -33,15 +33,18 @@ def single_vm_checker(vm_name):
     if code:
         return Response(message, status=200)
 
-    local_dhcp_response_dict, remote_dhcp_response_list = init_checker.run_dhcp_checker(vm_name, client_obj)
+    vm_response_dict, dhcp_response_list, dhcp_ns_response_list = init_checker.run_dhcp_checker(vm_name, client_obj)
 
-    response_list = remote_dhcp_response_list
-    response_list.append(local_dhcp_response_dict)
-    response_list.append(arp_response_dict)
+    response_list = []
+    response_list.append(vm_response_dict)
+    for dhcp_dict in dhcp_response_list:
+        response_list.append(dhcp_dict)
+    for dhcp_dict in dhcp_ns_response_list:
+        response_list.append(dhcp_dict)
 
     resp = make_response(jsonify(response_list), 200)
-    resp.headers['Packet Data'] = 'THERE'
     return resp
+
 
 @app.route('/v1/single/fip/<string:vm_name>', methods=['GET'])
 def fip_checker(vm_name):
@@ -61,8 +64,8 @@ def snat_checker(vm_name):
     resp = make_response(jsonify(snat_response_dict), 200)
     return resp
 
-@app.route('/v1/pair/<string:source_vm>/<string:dest_vm>', methods=['GET'])
-def paired_vms_checker(source_vm, dest_vm):
+@app.route('/v1/pair/ping/<string:source_vm>/<string:dest_vm>', methods=['GET'])
+def ping_vms_checker(source_vm, dest_vm):
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
     arp_response_dict, message, code = init_checker.run_arp_checker(source_vm, client_obj)

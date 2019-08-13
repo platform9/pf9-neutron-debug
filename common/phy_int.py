@@ -2,6 +2,8 @@ import os
 import subprocess
 import re
 
+### DEPRECTED MODULE - use phy_interface instead ###
+
 def ovs_output():
     os.system("ovs-vsctl show > ovs-vsctl.txt")
     with open("ovs-vsctl.txt") as f:

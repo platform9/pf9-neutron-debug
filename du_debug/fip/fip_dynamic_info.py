@@ -34,6 +34,7 @@ class FIPInfo:
 
         listen_fip_dict = dict()
         listen_fip_dict['checker_type'] = "FIP"
+        listen_fip_dict['packet_type'] = "ICMP"
         listen_fip_dict['vm_name'] = self.vm_name
         listen_fip_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         listen_fip_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -46,9 +47,10 @@ class FIPInfo:
 	listen_fip_dict['network_type'] = self.network_type
         listen_fip_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.floating_ip, listen_fip_dict['dest_ip_address'], listen_fip_dict['dest_ip_address'], self.floating_ip)
         listen_fip_dict['bridge_name'] = discovery.get_bridge_name(self.network_label, self.source_host_id, self.neutron)
-        listen_fip_dict['tag'] = "source"
+        listen_fip_dict['tag'] = "SOURCE VM"
         listen_fip_dict['vif_names'] = []
         listen_fip_dict['ns_vif_names'] = []
+        listen_fip_dict["path_type"] = "bidirectional"
 
         vif_names = discovery.get_vif_names(listen_fip_dict['port_id'])
         for port_type, vif_name in vif_names.items():

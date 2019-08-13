@@ -10,8 +10,22 @@ import snat_dynamic_info
 import logging
 import pdb
 import time
+import coloredlogs
 
 neutron = init_neutron_client.make_neutron_object()
+
+#logging.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+logger = logging.getLogger("main_logger")
+
+fh = logging.FileHandler('/var/log/neutron_debug/neutron_debug.log')
+fh.setLevel(logging.DEBUG)
+
+formatter = coloredlogs.ColoredFormatter('%(asctime)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
+logger.addHandler(fh)
+
+coloredlogs.install(level='DEBUG')
+
 
 def run_arp_checker(source_vm, client_obj):
 
@@ -32,26 +46,39 @@ def run_arp_checker(source_vm, client_obj):
 
 def run_dhcp_checker(vm_name, client_obj):
 
-    local, remote = dhcp_dynamic_info.create_dhcp_dict(vm_name, neutron)
-    message = client_obj.check_dnsmasq_process(local['vm info'], local['vm info']['host_id'])
-    print message
-    logging.info(message)
-    if "CODE 1" in message or "CODE 2" in message:
-        sys.exit()
-    for host in remote['dhcp remote hosts']:
-        message = client_obj.check_dnsmasq_process(local['vm info'], host['host_id'])
+    vm_dict, dhcp_list, inject_dict = get_dhcp_info(vm_name)
+    print "VM DICT"
+    print vm_dict
+    print "DHCP LIST"
+    print dhcp_list
+    print "INJECT DICT"
+    print inject_dict
+
+    for dhcp_dict in dhcp_list:
+        message = client_obj.check_dnsmasq_process(vm_dict, dhcp_dict['host_id'])
         print message
-	logging.info(message)
+	logger.info(message)
         if "CODE 1" in message or "CODE 2" in message:
-            sys.exit()
+           sys.exit()
+    logger.info("")
 
+    client_obj.listen_on_host(vm_dict)
+    for dhcp_dict in dhcp_list:
+	if dhcp_dict['host_id'] != vm_dict['host_id']:
+           client_obj.listen_on_host(dhcp_dict)
+        client_obj.listen_ns_on_host(dhcp_dict)
+    time.sleep(3)
+    client_obj.source_dhcp_inject(inject_dict)
+    time.sleep(3)
+    vm_response_dict = client_obj.retrieve_listener_data(vm_dict)
     dhcp_response_list = []
-    client_obj.send_dhcp_to_remote_hosts(remote)
-    time.sleep(2)
-    local_dhcp_response_dict = client_obj.local_host_recieve_dhcp_message(local)
-    remote_dhcp_response_list = client_obj.retrieve_remote_dhcp_data(remote)
+    dhcp_ns_response_list = []
+    for dhcp_dict in dhcp_list:
+	if dhcp_dict['host_id'] != vm_dict['host_id']:
+           dhcp_response_list.append(client_obj.retrieve_listener_data(dhcp_dict))
+        dhcp_ns_response_list.append(client_obj.retrieve_ns_listener_data(dhcp_dict))
 
-    return local_dhcp_response_dict, remote_dhcp_response_list
+    return vm_response_dict, dhcp_response_list, dhcp_ns_response_list
 
 def run_icmp_checker(source_vm, dest_vm, client_obj):
 
@@ -96,8 +123,8 @@ def run_snat_checker(vm_name, client_obj):
     print "REMOTE SNAT"
     print listen_remote_snat_dict
 
-    snat_resp = dict()   
- 
+    snat_resp = dict()
+
     if flag == "local":
         client_obj.listen_on_host(listen_local_snat_dict)
         client_obj.listen_ns_on_host(listen_local_snat_dict)
@@ -121,12 +148,12 @@ def run_snat_checker(vm_name, client_obj):
         snat_local_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_local_snat_dict)
         snat_remote_response_dict = client_obj.retrieve_listener_data(listen_remote_snat_dict)
         snat_remote_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_remote_snat_dict)
-	
+
 	snat_resp.update(snat_local_response_dict)
 	snat_resp.update(snat_local_ns_response_dict)
 	snat_resp.update(snat_remote_response_dict)
 	snat_resp.update(snat_remote_ns_response_dict)
-	
+
     return snat_resp
 
 
@@ -142,6 +169,7 @@ def analyze_arp_data(host_dict, arp_response_dict):
 
     expected_tunnel_ips = host_dict.values()
     actual_tunnel_ips = []
+    print arp_response_dict
     for packet in arp_response_dict[arp_response_dict.keys()[0]]:
         actual_tunnel_ips.append(packet[3])
 
@@ -149,13 +177,22 @@ def analyze_arp_data(host_dict, arp_response_dict):
 
     if len(diff) == 0:
         message = "ARP Packet sent to every host with port on VXLAN Network"
-        logging.info(message)
+        logger.info(message)
         code = 0
     else:
         message = "ARP Packet not sending to following host tunnel ips: %s" % diff
-        logging.info(message)
+        logger.info(message)
         code = 1
+
+    logger.info("")
     return message, code
+
+def get_dhcp_info(vm_name):
+    dhcp_info = dhcp_dynamic_info.DHCPInfo(vm_name, neutron)
+    vm_dict = dhcp_info.get_vm_dict()
+    dhcp_list = dhcp_info.get_dhcp_list()
+    inject_dict = dhcp_info.get_inject_dict()
+    return vm_dict, dhcp_list, inject_dict
 
 def get_icmp_info(source_vm, dest_vm):
 

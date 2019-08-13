@@ -38,6 +38,7 @@ class ARPInfo:
     def format_source_dict(self):
         source_arp_dict = dict()
         source_arp_dict['checker_type'] = "ARP"
+        source_arp_dict['packet_type'] = "ARP"
         source_arp_dict['vm_name'] = self.vm_name
         source_arp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         source_arp_dict['src_mac_address'] = self.source_port_dict['mac_address']
@@ -54,7 +55,7 @@ class ARPInfo:
         source_arp_dict['tunnel_ip'] = tunnel_ip
         source_arp_dict['vxlan_filter'] = "src %s and udp port (4789)" % (source_arp_dict['tunnel_ip'])
         source_arp_dict['tunnel_port'] = discovery.get_tunnel_port(self.source_host_id, source_arp_dict['tunnel_ip'], self.neutron)
-        source_arp_dict['tag'] = "arp_source %s" % source_arp_dict['tunnel_ip']
+        source_arp_dict['tag'] = "ARP SOURCE %s" % source_arp_dict['tunnel_ip']
 
         return source_arp_dict
 

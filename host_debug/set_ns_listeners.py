@@ -5,7 +5,7 @@ import threading
 from scapy import all as scapy
 
 PORT_ID_PREFEX = 11
-DHCP_MESSATE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
+DHCP_MESSAGE_TYPE = ['', 'DHCPDISCOVER', 'DHCPOFFER', 'DHCPREQUEST',
                               'DHCPDECLINE', 'DHCPACK', 'DHCPNAK', 'DHCPRELEASE']
 ICMP_MESSAGE_TYPE = {0:'REPLY',8:'REQUEST', 3:'DEST_UNREACHABLE'}
 TIMEOUT = 7
@@ -42,14 +42,17 @@ class SetNsListener:
             for vif_name, vif_dict in vif.items():
                 packets = scapy.rdpcap("../pcap/%s.pcap" % vif_name)
 
-                data[tag + ":" + vif_name] = []
+                data[vif_name] = []
                 for p in packets:
                     if self.listener_dict['checker_type'] == "FIP" or self.listener_dict['checker_type'] == "SNAT":
                         packet_type, src, dst = p[scapy.ICMP].type, p.src, p.dst
 			if packet_type in ICMP_MESSAGE_TYPE:
 			   message_type = ICMP_MESSAGE_TYPE[packet_type]
+		    else:
+			packet_type, src, dst = p[scapy.DHCP].options[0], p.src, p.dst
+			message_type = DHCP_MESSAGE_TYPE[packet_type[1]]
                     if message_type is not None:
-                       data[tag + ":" + vif_name].append([message_type, "src: %s" % src, "dst: %s" % dst])
+                       data[vif_name].append([message_type, "src: %s" % src, "dst: %s" % dst])
         return data
 
 

@@ -7,9 +7,6 @@ sys.path.append('./dhcp/')
 import time
 import oslo_messaging
 import eventlet
-import dhcp_local
-import dhcp_remote
-import dhcp_port
 import dnsmasq_checker
 
 import scapy_driver
@@ -35,21 +32,8 @@ class CheckerEndpoint(object):
         self.server = server
 	self.pcap = pcap_driver.PcapDriver()
 	self.scapy = scapy_driver.ScapyDriver()
-
-
-    def send_remote_listener_dhcp_data(self, ctx, remote):
-        dhcp_remote_data = self.dhcp_remote_obj.collect_data()
-        log_to_du(dhcp_remote_data)
-        return dhcp_remote_data
-
-    def init_dhcp(self, ctx, dhcp_d):
-	if "dhcp local host" in dhcp_d.keys():
-	   self.dhcp_local_data = dhcp_local.init_dhcp_check(dhcp_d)
-           log_to_du(self.dhcp_local_data)
-           return self.dhcp_local_data
-        elif "dhcp remote host" in dhcp_d.keys():
-	   self.dhcp_remote_obj = dhcp_remote.DHCPRemote(dhcp_d)
-	   self.dhcp_remote_obj.init_dhcp_check()
+        self.listener_obj_dict = dict()
+        self.ns_listener_obj_dict = dict()
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
@@ -60,15 +44,22 @@ class CheckerEndpoint(object):
 
     def set_port_listeners(self, ctx, listener_dict):
 
-        self.set_listen_obj = set_listeners.SetListener(listener_dict)
-        self.set_listen_obj.init_listeners()
+        set_listen_obj = set_listeners.SetListener(listener_dict)
+        set_listen_obj.init_listeners()
+        self.listener_obj_dict[listener_dict['port_id']] = set_listen_obj
         time.sleep(2)
 
     def set_ns_port_listeners(self, ctx, listener_dict):
 
-        self.set_ns_listen_obj = set_ns_listeners.SetNsListener(listener_dict)
-        self.set_ns_listen_obj.init_listeners()
+        set_ns_listen_obj = set_ns_listeners.SetNsListener(listener_dict)
+        set_ns_listen_obj.init_listeners()
+        self.ns_listener_obj_dict[listener_dict['port_id']] = set_ns_listen_obj
         time.sleep(2)
+
+    def inject_dhcp_packet(self, ctx, inject_dict):
+
+        self.scapy.send_dhcp_over_qbr(inject_dict['inject_port'], inject_dict['src_mac_address'])
+        time.sleep(1)
 
     def inject_icmp_packet(self, ctx, inject_dict):
 
@@ -82,14 +73,14 @@ class CheckerEndpoint(object):
 
     def send_listener_data(self, ctx, listener_dict):
 
-        checker_data = self.set_listen_obj.collect_data()
-        log_to_du(checker_data)
+        checker_data = self.listener_obj_dict[listener_dict['port_id']].collect_data()
+        log_to_du(checker_data, listener_dict)
         return checker_data
 
     def send_ns_listener_data(self, ctx, listener_dict):
 
-        checker_data = self.set_ns_listen_obj.collect_data()
-        log_to_du(checker_data)
+        checker_data = self.ns_listener_obj_dict[listener_dict['port_id']].collect_data()
+        log_to_du(checker_data, listener_dict)
         return checker_data
 
 def main():
@@ -123,10 +114,10 @@ def main():
 	print("Stopping server")
 
 
-def log_to_du(transport_json):
+def log_to_du(transport_json, information_json):
 
     client = oslo_messaging.RPCClient(transport, du_target)
-    client.cast({}, 'recieve_dict', d=transport_json)
+    client.cast({}, 'recieve_dict', data=transport_json, info=information_json)
 
 def message_to_du(message):
 
