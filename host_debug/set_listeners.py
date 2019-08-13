@@ -32,21 +32,23 @@ class SetListener:
 	if "bridge_name_remote_ext" in self.listener_dict:
 	   ext_phy_port = phy_interface.get_phy_interface(self.listener_dict['bridge_name_remote_ext'])
 	   vif_names.append({ext_phy_port: {'is_ns':"None", 'port_type':"ext_nic", 'filter': self.listener_dict['ext_nic_filter']}})
+	   print vif_names
 
         listeners = []
         for vif in vif_names:
 	    for vif_name, vif_dict in vif.items():
                 if "nic" == vif_dict["port_type"] and self.listener_dict['network_type'] == 'vxlan':
                    listeners.append(pcap.setup_listener(vif_name, self.listener_dict['vxlan_filter']))
-                elif "nic" == vif_dict["port_type"] or "ext_nic" == vif_dict["port_type"]:
+                elif "nic" == vif_dict["port_type"]:
                    listeners.append(pcap.setup_listener(vif_name, self.listener_dict['nic_filter']))
+		elif "ext_nic" == vif_dict["port_type"]:
+		   listeners.append(pcap.setup_listener(vif_name, self.listener_dict['ext_nic_filter']))
                 else:
                    listeners.append(pcap.setup_listener(vif_name, vif_dict['filter']))
 
         self.listeners = listeners
         self.phy_port = phy_port
 
-	print listeners
         return listeners
 
     def collect_data(self):
