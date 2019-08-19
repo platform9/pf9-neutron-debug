@@ -1,4 +1,4 @@
-import os
+import subprocess
 import pcap
 import scapy_driver
 import threading
@@ -57,4 +57,9 @@ class SetNsListener:
 
 
 def tcpdump_process(ns, vif, filter):
-    os.system('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif))
+    p = subprocess.Popen('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    output, err = p.communicate()
+    if "No such device exists" in err:
+        writer=scapy.PcapWriter("../pcap/%s.pcap" % vif)
+        writer.write([])
+        writer.flush()
