@@ -38,16 +38,16 @@ def run_du_static_checks(vm_name, neutron):
 def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
 
     if vm_host_code == 1:
-        logger.info("VM HOST is down, unable to run DHCP traffic tests")
+        logger.info("VM HOST is down, unable to run DHCP traffic tests\n")
         return 1
     if vm_code == 1:
-        logger.info("VM Port is down, unable to run DHCP traffic tests")
+        logger.info("VM Port is down, unable to run DHCP traffic tests\n")
         return 1
 
     dhcp_host_error = 0
     for i_d,code in host_error_dict.items():
         if code == 1:
-            logger.info("DHCP HOST %s is down, unable to run DHCP traffic tests" % (i_d))
+            logger.info("DHCP HOST %s is down, unable to run DHCP traffic tests\n" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1
@@ -55,7 +55,7 @@ def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
     dhcp_server_error = 0
     for i_d,code in dhcp_error_dict.items():
         if code == 1:
-            logger.info("DHCP SERVER Port %s is down, unable to run DHCP traffic tests" % (i_d))
+            logger.info("DHCP SERVER Port %s is down, unable to run DHCP traffic tests\n" % (i_d))
             dhcp_host_error = 1
     if dhcp_host_error:
         return 1

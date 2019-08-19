@@ -51,8 +51,20 @@ class LogData:
                     else:
                         logger.error("ERROR: UNKNOWN PACKET ON %s on %s host" % (vif_name, info_dict["tag"]))
 		    logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
-		else:
-                    logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+		elif len(packet_array) == 1:
+		    if "REPLY" not in packet_array[0]:
+		    	logger.error("ERROR: NO ICMP REPLY FOUND ON %s on %s host" % (vif_name, info_dict["tag"]))
+		    	logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+		    else:
+		    	logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+	    	elif len(packet_array) == 2 and "qr" not in vif_name:
+		    if "REPLY" not in packet_array[0] and "REPLY" not in packet_array[1]:
+		    	logger.error("ERROR: NO ICMP REPLY FOUND ON %s on %s host" % (vif_name, info_dict["tag"]))
+		    	logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+		    else:
+		    	logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+            	else:
+		    logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
         elif info_dict["tag"] == "SNAT NS":
             self.regular_packet_analysis(data_dict, info_dict)
         logger.info("")
@@ -138,6 +150,18 @@ class LogData:
                     logger.error("ERROR: NO ICMP REPLY FOUND ON %s on %s host" % (vif_name, info_dict["tag"]))
                 else:
                     logger.error("ERROR: UNKNOWN PACKET ON %s on %s host" % (vif_name, info_dict["tag"]))
-		logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+            	logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+	    elif len(packet_array) == 1:
+		if "REPLY" not in packet_array[0]:
+		    logger.error("ERROR: NO ICMP REPLY FOUND ON %s on %s host" % (vif_name, info_dict["tag"]))
+		    logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+		else:
+		    logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+	    elif len(packet_array) == 2:
+		if "REPLY" not in packet_array[0] and "REPLY" not in packet_array[1]:
+		    logger.error("ERROR: NO ICMP REPLY FOUND ON %s on %s host" % (vif_name, info_dict["tag"]))
+		    logger.error("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
+		else:
+		    logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
             else:
 		logger.debug("INTERFACE: " + vif_name + "   " + "PACKET DATA: " + str(packet_array))
