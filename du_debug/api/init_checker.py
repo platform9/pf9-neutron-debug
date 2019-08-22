@@ -163,7 +163,7 @@ def analyze_arp_data(host_dict, arp_response_dict):
 
     expected_tunnel_ips = host_dict.values()
     actual_tunnel_ips = []
-    for packet in arp_response_dict[arp_response_dict.keys()[0]]:
+    for packet in arp_response_dict[list(arp_response_dict.keys())[0]]:
         actual_tunnel_ips.append(packet[3])
 
     diff = list(set(expected_tunnel_ips)-set(actual_tunnel_ips))
