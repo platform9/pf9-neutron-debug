@@ -28,15 +28,15 @@ class SetNsListener:
         return tcp_thread
 
     def join_threads(self):
-	for thread in self.threads:
-	   thread.join()
+        for thread in self.threads:
+            thread.join()
 
     def collect_data(self):
 
         data = dict()
         tag = self.listener_dict['tag']
 
-	self.join_threads()
+        self.join_threads()
 
         for vif in self.listener_dict['ns_vif_names']:
             for vif_name, vif_dict in vif.items():
@@ -46,11 +46,11 @@ class SetNsListener:
                 for p in packets:
                     if self.listener_dict['checker_type'] == "FIP" or self.listener_dict['checker_type'] == "SNAT":
                         packet_type, src, dst = p[scapy.ICMP].type, p.src, p.dst
-			if packet_type in ICMP_MESSAGE_TYPE:
-			   message_type = ICMP_MESSAGE_TYPE[packet_type]
-		    else:
-			packet_type, src, dst = p[scapy.DHCP].options[0], p.src, p.dst
-			message_type = DHCP_MESSAGE_TYPE[packet_type[1]]
+                        if packet_type in ICMP_MESSAGE_TYPE:
+                           message_type = ICMP_MESSAGE_TYPE[packet_type]
+                    else:
+                        packet_type, src, dst = p[scapy.DHCP].options[0], p.src, p.dst
+                        message_type = DHCP_MESSAGE_TYPE[packet_type[1]]
                     if message_type is not None:
                        data[vif_name].append([message_type, "src: %s" % src, "dst: %s" % dst])
         return data
@@ -59,6 +59,7 @@ class SetNsListener:
 def tcpdump_process(ns, vif, filter):
     p = subprocess.Popen('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, err = p.communicate()
+    err = err.decode()
     if "No such device exists" in err:
         writer=scapy.PcapWriter("../pcap/%s.pcap" % vif)
         writer.write([])

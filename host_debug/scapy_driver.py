@@ -27,7 +27,7 @@ class ScapyDriver(object):
         ip = scapy.IP(src=src_ip,dst=dst_ip)
         icmp = scapy.ICMP()
         packet = scapy.Ether(src=src_mac, dst=dst_mac)/ ip / icmp / scapy.Raw(load=payload)
-	scapy.sendp(packet, iface=interface_name)
+        scapy.sendp(packet, iface=interface_name)
 
     def send_dhcp_over_qbr(self, qbr_device, port_mac):
         """Send DHCP Discovery over qvb device.

@@ -30,16 +30,16 @@ class CheckerEndpoint(object):
 
     def __init__(self, server):
         self.server = server
-	self.pcap = pcap_driver.PcapDriver()
-	self.scapy = scapy_driver.ScapyDriver()
+        self.pcap = pcap_driver.PcapDriver()
+        self.scapy = scapy_driver.ScapyDriver()
         self.listener_obj_dict = dict()
         self.ns_listener_obj_dict = dict()
 
     def dnsmasq_check(self, ctx, dhcp_d, host_id):
 
         message = dnsmasq_checker.init_dnsmasq_check(dhcp_d, host_id)
-	print "LOCAL HOST: " + message
-	return message
+        print("LOCAL HOST: " + message)
+        return message
 
 
     def set_port_listeners(self, ctx, listener_dict):
@@ -104,14 +104,14 @@ def main():
     server.wait()
 
     try:
-	server.reset()
+        server.reset()
         server.start()
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-	server.stop()
+        server.stop()
         server.wait()
-	print("Stopping server")
+        print("Stopping server")
 
 
 def log_to_du(transport_json, information_json):
