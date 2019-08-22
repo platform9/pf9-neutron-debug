@@ -17,7 +17,7 @@ class DHCPInfo:
         self.vm_name = discovery.vmname_parse(vm_name)
 
         self.source_port_dict = discovery.get_port_dict(self.vm_name, self.neutron)
-	self.network_id = self.source_port_dict['network_id']
+        self.network_id = self.source_port_dict['network_id']
         self.source_host_id = self.source_port_dict['binding:host_id']
         self.dhcp_ports = discovery.get_all_dhcp_ports(self.network_id, self.neutron)
 
@@ -52,7 +52,7 @@ class DHCPInfo:
         vm_dict['vxlan_filter'] = "(src %s or dst %s) and udp port (4789)" % (tunnel_ip, tunnel_ip)
         vm_dict['tunnel_ip'] = tunnel_ip
         vm_dict['tag'] = "VM SOURCE"
-	vm_dict['bridge_name'] = bridge_name
+        vm_dict['bridge_name'] = bridge_name
         vm_dict["num_dhcp"] = len(self.dhcp_ports)
         vm_dict["local_dhcp"] = self.local_dhcp
         vm_dict['vif_names'] = self.vif_names
@@ -103,9 +103,9 @@ class DHCPInfo:
         inject_dict.update(self.vm_dict)
 
         for vif in inject_dict['vif_names']:
-	       if "qbr" in vif.keys()[0]:
-	          inject_port = vif.keys()[0]
-	          break
+            if "qbr" in list(vif.keys())[0]:
+               inject_port = list(vif.keys())[0]
+               break
 
         inject_dict['inject_port'] = inject_port
         return inject_dict

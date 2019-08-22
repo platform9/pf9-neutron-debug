@@ -1,15 +1,13 @@
 pbr!=2.1.0,>=2.0.0
 
+coloredlogs
 eventlet
 flask
 keystoneauth1
-logging
 os_client_config
 oslo.log
 oslo.config
 oslo_messaging
-pcap-ct
-pycap
 pypcap
 pypcapfile
 python-openstackclient

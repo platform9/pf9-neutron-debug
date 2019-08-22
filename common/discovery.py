@@ -59,8 +59,8 @@ def get_network_type(vm_network_id, neutron):
 
 def get_start_ip(vm_network_id, neutron):
     for subnet in neutron.list_subnets()['subnets']:
-	if subnet['network_id'] == vm_network_id:
-	    return subnet['allocation_pools'][0]['start']
+        if subnet['network_id'] == vm_network_id:
+           return subnet['allocation_pools'][0]['start']
 
 def get_bridge_name(network_label, host_id, neutron):
     auth_token = neutron.get_auth_info()['auth_token']
@@ -97,7 +97,6 @@ def get_vxlan_host_dict(vm_network_id, neutron, source_host_id):
     host_list = set(host_list)
     for host in host_list:
         host_dict[host] = get_tunnel_ip(host, neutron)
-    print host_dict
     return host_dict
 
 def get_fip_info(fixed_ip_address ,neutron):

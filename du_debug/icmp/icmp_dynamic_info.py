@@ -70,7 +70,7 @@ class ICMPInfo:
             vif[vif_name] = dict()
             vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (source_icmp_dict['src_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['dest_ip_address'], source_icmp_dict['src_ip_address'])
             vif[vif_name]['is_ns'] = "None"
-	    vif[vif_name]['port_type'] = port_type
+            vif[vif_name]['port_type'] = port_type
             source_icmp_dict['vif_names'].append(vif)
 
         return source_icmp_dict
@@ -111,7 +111,7 @@ class ICMPInfo:
             vif[vif_name] = dict()
             vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (dest_icmp_dict['src_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['dest_ip_address'], dest_icmp_dict['src_ip_address'])
             vif[vif_name]['is_ns'] = "None"
-	    vif[vif_name]['port_type'] = port_type
+            vif[vif_name]['port_type'] = port_type
             dest_icmp_dict['vif_names'].append(vif)
 
         return dest_icmp_dict
@@ -122,10 +122,10 @@ class ICMPInfo:
         inject_icmp_dict.update(self.source_icmp_listen_dict)
         inject_icmp_dict['payload'] = "abcd" * 3
 
-	for vif in inject_icmp_dict['vif_names']:
-	    if "qbr" in vif.keys()[0]:
-		inject_port = vif.keys()[0]
-		break
+        for vif in inject_icmp_dict['vif_names']:
+            if "qbr" in list(vif.keys())[0]:
+               inject_port = list(vif.keys())[0]
+               break
 
         inject_icmp_dict['inject_port'] = inject_port
 

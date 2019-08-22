@@ -44,16 +44,16 @@ class GetHostDataEndpoint(object):
 
     def __init__(self, server):
         self.server = server
-	self.log_info = log_data.LogData()
+        self.log_info = log_data.LogData()
 
     def recieve_dict(self, ctx, data, info):
-        print "_______________RETURNED JSON___________________"
-        print data
+        print("_______________RETURNED JSON___________________")
+        print(data)
         self.log_info.log_data(data, info)
 
     def get_message(self, ctx, message):
         logs.info(message)
-        print message
+        print(message)
 
 def main():
 
@@ -83,14 +83,14 @@ def start_wsgi_server():
 
 def server_process(rpcserver):
     try:
-	rpcserver.reset()
+        rpcserver.reset()
         rpcserver.start()
-	print "Server Starting..."
+        print("Server Starting...")
         while True:
            time.sleep(1)
     except KeyboardInterrupt:
         rpcserver.stop()
-	rpcserver.wait()
+        rpcserver.wait()
         print("Stopping server")
 
 def create_server(conf, transport, target):

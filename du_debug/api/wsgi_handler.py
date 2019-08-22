@@ -26,7 +26,7 @@ def dhcp_checker(vm_name):
     error_code = dhcp_static_info.run_du_static_checks(vm_name, init_checker.neutron)
     if error_code:
         return Response("Static Error detected -> VM Port, DHCP Port, or Host is down. Check /var/log/neutron_debug/neutron_debug.log for specific error\n", status=200)
-    print "HEARTBEAT tests look OK, ready to move on"
+    print("HEARTBEAT tests look OK, ready to move on")
 
     client_obj = du_rpc_handler.RPCClientObject(CONF)
     arp_response_dict, message, code = init_checker.run_arp_checker(vm_name, client_obj)

@@ -24,8 +24,8 @@ class ARPInfo:
 
         if self.network_type == "vlan":
             self.source_arp_listen_dict = {'network_type':"vlan"}
-	    self.inject_arp_dict = {}
-	    self.host_dict = {}
+            self.inject_arp_dict = {}
+            self.host_dict = {}
         else:
             self.format_arp_dicts()
 
@@ -42,7 +42,7 @@ class ARPInfo:
         source_arp_dict['vm_name'] = self.vm_name
         source_arp_dict['src_ip_address'] = self.source_port_dict['fixed_ips'][0]['ip_address']
         source_arp_dict['src_mac_address'] = self.source_port_dict['mac_address']
-	source_arp_dict['dest_ip_address'] = discovery.get_start_ip(self.network_id, self.neutron)
+        source_arp_dict['dest_ip_address'] = discovery.get_start_ip(self.network_id, self.neutron)
         source_arp_dict['host_id'] = self.source_host_id
         source_arp_dict['port_id'] = self.source_port_dict['id']
         source_arp_dict['network_label'] = self.network_label

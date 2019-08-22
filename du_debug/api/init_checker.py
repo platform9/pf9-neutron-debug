@@ -47,24 +47,23 @@ def run_arp_checker(source_vm, client_obj):
 def run_dhcp_checker(vm_name, client_obj):
 
     vm_dict, dhcp_list, inject_dict = get_dhcp_info(vm_name)
-    print "VM DICT"
-    print vm_dict
-    print "DHCP LIST"
-    print dhcp_list
-    print "INJECT DICT"
-    print inject_dict
+    print("VM DICT")
+    print(vm_dict)
+    print("DHCP LIST")
+    print(dhcp_list)
+    print("INJECT DICT")
+    print(inject_dict)
 
     for dhcp_dict in dhcp_list:
         message = client_obj.check_dnsmasq_process(vm_dict, dhcp_dict['host_id'])
-        print message
-	logger.info(message)
+        logger.info(message)
         if "CODE 1" in message or "CODE 2" in message:
            sys.exit()
     logger.info("")
 
     client_obj.listen_on_host(vm_dict)
     for dhcp_dict in dhcp_list:
-	if dhcp_dict['host_id'] != vm_dict['host_id']:
+        if dhcp_dict['host_id'] != vm_dict['host_id']:
            client_obj.listen_on_host(dhcp_dict)
         client_obj.listen_ns_on_host(dhcp_dict)
     time.sleep(3)
@@ -74,7 +73,7 @@ def run_dhcp_checker(vm_name, client_obj):
     dhcp_response_list = []
     dhcp_ns_response_list = []
     for dhcp_dict in dhcp_list:
-	if dhcp_dict['host_id'] != vm_dict['host_id']:
+        if dhcp_dict['host_id'] != vm_dict['host_id']:
            dhcp_response_list.append(client_obj.retrieve_listener_data(dhcp_dict))
         dhcp_ns_response_list.append(client_obj.retrieve_ns_listener_data(dhcp_dict))
 
@@ -98,10 +97,6 @@ def run_fip_checker(vm_name, client_obj):
 
     listen_fip_dict, inject_fip_dict = get_fip_info(vm_name)
 
-    print listen_fip_dict['ns_vif_names']
-    print ""
-    print listen_fip_dict['vif_names']
-
     client_obj.listen_on_host(listen_fip_dict)
     client_obj.listen_ns_on_host(listen_fip_dict)
     time.sleep(3)
@@ -118,10 +113,10 @@ def run_snat_checker(vm_name, client_obj):
 
     listen_local_snat_dict, listen_remote_snat_dict, inject_snat_dict, flag = get_snat_info(vm_name)
 
-    print "LOCAL SNAT"
-    print listen_local_snat_dict
-    print "REMOTE SNAT"
-    print listen_remote_snat_dict
+    print("LOCAL SNAT")
+    print(listen_local_snat_dict)
+    print("REMOTE SNAT")
+    print(listen_remote_snat_dict)
 
     snat_resp = dict()
 
@@ -135,7 +130,7 @@ def run_snat_checker(vm_name, client_obj):
         snat_local_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_local_snat_dict)
 
         snat_resp.update(snat_local_response_dict)
-	snat_resp.update(snat_local_ns_response_dict)
+        snat_resp.update(snat_local_ns_response_dict)
     elif flag == "remote":
         client_obj.listen_on_host(listen_local_snat_dict)
         client_obj.listen_ns_on_host(listen_local_snat_dict)
@@ -148,11 +143,10 @@ def run_snat_checker(vm_name, client_obj):
         snat_local_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_local_snat_dict)
         snat_remote_response_dict = client_obj.retrieve_listener_data(listen_remote_snat_dict)
         snat_remote_ns_response_dict = client_obj.retrieve_ns_listener_data(listen_remote_snat_dict)
-
-	snat_resp.update(snat_local_response_dict)
-	snat_resp.update(snat_local_ns_response_dict)
-	snat_resp.update(snat_remote_response_dict)
-	snat_resp.update(snat_remote_ns_response_dict)
+        snat_resp.update(snat_local_response_dict)
+        snat_resp.update(snat_local_ns_response_dict)
+        snat_resp.update(snat_remote_response_dict)
+        snat_resp.update(snat_remote_ns_response_dict)
 
     return snat_resp
 
@@ -169,7 +163,6 @@ def analyze_arp_data(host_dict, arp_response_dict):
 
     expected_tunnel_ips = host_dict.values()
     actual_tunnel_ips = []
-    print arp_response_dict
     for packet in arp_response_dict[arp_response_dict.keys()[0]]:
         actual_tunnel_ips.append(packet[3])
 

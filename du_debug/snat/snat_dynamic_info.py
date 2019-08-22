@@ -18,11 +18,11 @@ class SNATInfo:
         self.source_host_id = self.source_port_dict['binding:host_id']
         self.fixed_ip_address = self.source_port_dict['fixed_ips'][0]['ip_address']
         self.tenant_network_id = self.source_port_dict['network_id']
-	self.sg_port = discovery.get_sg_port(self.tenant_network_id, self.neutron)
-	self.router_id = self.sg_port['device_id']
+        self.sg_port = discovery.get_sg_port(self.tenant_network_id, self.neutron)
+        self.router_id = self.sg_port['device_id']
         self.qr_port_id, self.dest_mac_address = discovery.get_qr_port(self.router_id, self.neutron)
         self.qg_port = discovery.get_qg_port(self.router_id, self.neutron)
-	self.external_network_id = self.qg_port['network_id']
+        self.external_network_id = self.qg_port['network_id']
         self.snat_external_ip = self.qg_port['fixed_ips'][0]['ip_address']
         self.dest_ip_address = "8.8.8.8"
         self.vif_names = self.get_vif_list()
@@ -52,7 +52,7 @@ class SNATInfo:
         local_listen_dict['host_id'] = self.source_host_id
         local_listen_dict['port_id'] = self.source_port_dict['id']
         local_listen_dict['network_label'] = discovery.get_network_label(self.external_network_id, self.neutron)
-	local_listen_dict['network_type'] = discovery.get_network_type(self.external_network_id, self.neutron)
+        local_listen_dict['network_type'] = discovery.get_network_type(self.external_network_id, self.neutron)
         local_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.snat_external_ip, self.dest_ip_address, self.dest_ip_address, self.snat_external_ip)
         local_listen_dict['bridge_name'] = discovery.get_bridge_name(local_listen_dict['network_label'], self.source_host_id, self.neutron)
         local_listen_dict['tag'] = "VM SOURCE"
@@ -75,7 +75,7 @@ class SNATInfo:
         local_listen_dict['host_id'] = self.source_host_id
         local_listen_dict['port_id'] = self.source_port_dict['id']
         local_listen_dict['network_label'] = discovery.get_network_label(self.tenant_network_id, self.neutron)
-	local_listen_dict['network_type'] = discovery.get_network_type(self.tenant_network_id, self.neutron)
+        local_listen_dict['network_type'] = discovery.get_network_type(self.tenant_network_id, self.neutron)
         local_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.fixed_ip_address, self.dest_ip_address, self.dest_ip_address, self.fixed_ip_address)
         local_listen_dict['snat_host'] = "remote"
 
@@ -93,7 +93,7 @@ class SNATInfo:
         local_listen_dict['ns_vif_names'] = []
         vif_buffer = self.ns_vif_names
         for vif in vif_buffer:
-            for vif_name in vif.keys():
+            for vif_name in list(vif.keys()):
                 if "qr" in vif_name:
                     local_listen_dict['ns_vif_names'].append(vif)
                     break
@@ -110,10 +110,10 @@ class SNATInfo:
         remote_listen_dict['host_id'] = self.snat_host_id
         remote_listen_dict['port_id'] = self.source_port_dict['id']
         remote_listen_dict['network_label_remote_ext'] = discovery.get_network_label(self.external_network_id, self.neutron)
-	remote_listen_dict['network_type_remote_ext'] = discovery.get_network_type(self.external_network_id, self.neutron)
+        remote_listen_dict['network_type_remote_ext'] = discovery.get_network_type(self.external_network_id, self.neutron)
         remote_listen_dict['network_label'] = discovery.get_network_label(self.tenant_network_id, self.neutron)
-	remote_listen_dict['network_type'] = discovery.get_network_type(self.tenant_network_id, self.neutron)
-	remote_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.fixed_ip_address, self.dest_ip_address, self.dest_ip_address, self.fixed_ip_address)
+        remote_listen_dict['network_type'] = discovery.get_network_type(self.tenant_network_id, self.neutron)
+        remote_listen_dict['nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.fixed_ip_address, self.dest_ip_address, self.dest_ip_address, self.fixed_ip_address)
         remote_listen_dict['ext_nic_filter'] = "icmp and  ((src %s and dst %s) or (src %s and dst %s)) " % (self.snat_external_ip, self.dest_ip_address, self.dest_ip_address, self.snat_external_ip)
 
         tunnel_ip = discovery.get_tunnel_ip(self.snat_host_id, self.neutron)
@@ -130,7 +130,7 @@ class SNATInfo:
         remote_listen_dict['vif_names'] = []
         remote_listen_dict['ns_vif_names'] = []
         for vif in vif_buffer:
-            for vif_name in vif.keys():
+            for vif_name in list(vif.keys()):
                 if "qg" in vif_name or "sg" in vif_name:
                     remote_listen_dict['ns_vif_names'].append(vif)
                     break
@@ -142,10 +142,10 @@ class SNATInfo:
         inject_icmp_dict.update(self.local_listen_dict)
         inject_icmp_dict['payload'] = "abcd" * 3
 
-	for vif in inject_icmp_dict['vif_names']:
-	    if "qbr" in vif.keys()[0]:
-	       inject_port = vif.keys()[0]
-	       break
+        for vif in inject_icmp_dict['vif_names']:
+            if "qbr" in list(vif.keys())[0]:
+               inject_port = list(vif.keys())[0]
+               break
 
         inject_icmp_dict['inject_port'] = inject_port
 
@@ -160,7 +160,7 @@ class SNATInfo:
             vif[vif_name] = dict()
             vif[vif_name]['filter'] = "icmp and ((src %s and dst %s) or (src %s and dst %s)) " % (self.fixed_ip_address, self.dest_ip_address, self.dest_ip_address, self.fixed_ip_address)
             vif[vif_name]['is_ns'] = "None"
-	    vif[vif_name]['port_type'] = port_type
+            vif[vif_name]['port_type'] = port_type
             vif_list.append(vif)
 
         return vif_list
@@ -172,12 +172,12 @@ class SNATInfo:
         for vif_name, netns in ns_vif_names.items():
             vif = dict()
             vif[vif_name] = dict()
-	    if "qg" in vif_name:
+            if "qg" in vif_name:
             	vif[vif_name]['filter'] = "icmp and host %s and host %s " % (self.snat_external_ip, self.dest_ip_address)
             else:
-		vif[vif_name]['filter'] = "icmp and host %s and host %s " % (self.fixed_ip_address, self.dest_ip_address)
-	    vif[vif_name]['is_ns'] = netns
-	    vif[vif_name]['port_type'] = vif_name
+                vif[vif_name]['filter'] = "icmp and host %s and host %s " % (self.fixed_ip_address, self.dest_ip_address)
+            vif[vif_name]['is_ns'] = netns
+            vif[vif_name]['port_type'] = vif_name
             ns_vif_list.append(vif)
 
         return ns_vif_list
