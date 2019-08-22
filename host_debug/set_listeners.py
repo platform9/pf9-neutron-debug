@@ -76,7 +76,7 @@ def get_sniff_result(listeners, handler):
         vif_pre = listener.name
         data[vif_pre] = []
         for packet in listener.readpkts():
-            packet_type, src, dst = handler(packet[1])
+            packet_type, src, dst = handler(scapy.Ether(packet[1]))
             if packet_type is not None:
                data[vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
     return data
@@ -89,25 +89,24 @@ def get_sniff_vxlan_result(phy_port, listeners, handler, listener_dict):
         for packet in listener.readpkts():
             if listener.name == phy_port:
                 outer_ether = scapy.Ether(packet[1])
-                inner_packet = outer_ether.load
-                inner_ether = scapy.Ether(inner_packet)
+                inner_ether = outer_ether[scapy.VXLAN]
                 src_mac_address = listener_dict['src_mac_address']
                 if listener_dict['checker_type'] == "SNAT":
                     src_ip_address = listener_dict['src_ip_address']
                     if listener_dict['packet_type'] in inner_ether and (inner_ether[scapy.IP].src == src_ip_address or inner_ether[scapy.IP].dst == src_ip_address):
-                        packet_type, src, dst = handler(inner_packet)
+                        packet_type, src, dst = handler(inner_ether)
                         if packet_type is not None:
                             data[vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
                 else:
                     if listener_dict['packet_type'] in inner_ether and (inner_ether.src == src_mac_address or inner_ether.dst == src_mac_address):
-                        packet_type, src, dst = handler(inner_packet)
+                        packet_type, src, dst = handler(inner_ether)
                         if packet_type is not None:
                             if "ARP" in listener_dict['tag']:
                                 data[vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst, outer_ether[scapy.IP].dst])
                             else:
                                 data[vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
             else:
-                packet_type, src, dst = handler(packet[1])
+                packet_type, src, dst = handler(scapy.Ether(packet[1]))
                 if packet_type is not None:
                    data[vif_pre].append([packet_type, "src: %s" % src, "dst: %s" % dst])
     return data

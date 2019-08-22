@@ -52,16 +52,14 @@ class ScapyDriver(object):
         scapy.sendp(packet, iface=interface_name)
 
 
-    def get_dhcp_mt(self, buff):
+    def get_dhcp_mt(self, ether_packet):
         """Pick out DHCP Message Type from buffer.
         """
-        ether_packet = scapy.Ether(buff)
         dhcp_packet = ether_packet[scapy.DHCP]
         message = dhcp_packet.options[0]
         return DHCP_MESSATE_TYPE[message[1]], ether_packet.src, ether_packet.dst
 
-    def get_icmp_mt(self, buff):
-        ether_packet = scapy.Ether(buff)
+    def get_icmp_mt(self, ether_packet):
         icmp_packet = ether_packet[scapy.ICMP]
         icmp_type = icmp_packet.type
         #data = icmp_packet.payload
@@ -72,8 +70,7 @@ class ScapyDriver(object):
             return ICMP_MESSAGE_TYPE[icmp_type], ether_packet.src, ether_packet.dst
         return "UNKNOWN"
 
-    def get_arp_op(self, buff):
-        ether_packet = scapy.Ether(buff)
+    def get_arp_op(self, ether_packet):
         arp_packet = ether_packet[scapy.ARP]
         return ARP_OP_TYPE[arp_packet.op], ether_packet.src, ether_packet.dst
 
