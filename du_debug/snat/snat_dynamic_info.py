@@ -9,6 +9,9 @@ import discovery
 PORT_ID_PREFEX = 10
 
 class SNATInfo:
+    """
+    Uses OpenStack SDK to retrieve all relevant information about a VM and the network it is on, for the SNAT Checker
+    """
 
     def __init__(self, vm_name, neutron):
         self.neutron = neutron

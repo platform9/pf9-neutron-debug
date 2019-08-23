@@ -5,6 +5,7 @@ import os
 from keystoneauth1 import identity
 from keystoneauth1 import session
 
+# Creates a neutron client to access APIs
 def make_neutron_object():
 
     neutron_session = create_credentials()

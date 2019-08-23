@@ -1,0 +1,53 @@
+{
+  "role_name": "pf9-neutron-debug",
+  "display_name": "Neutron Debug Service",
+  "description": "Helps debug Neutron Networking issues",
+  "customizable_settings": {
+      "debug": {
+          "path": "config/designate/DEFAULT",
+          "default": "True"
+      },
+      "listen": {
+          "path": "config/designate/service:mdns",
+          "default": "0.0.0.0:5354"
+      }
+  },
+  "rabbit_permissions": {
+      "config": "^(.*)$",
+      "write": "^(.*)$",
+      "read": "^(.*)$"
+  },
+  "role_version": "__VERSION__",
+  "config": {
+    "pf9-designate": {
+      "service_states": {
+        "pf9-designate-mdns": true,
+        "pf9-designate-worker": true
+      },
+      "version": "__VERSION__",
+      "url": "%(download_protocol)s://%(host_relative_amqp_fqdn)s:%(download_port)s/private/pf9-designate-__VERSION__.x86_64.rpm",
+      "config": {
+        "designate": {
+          "DEFAULT": {
+            "debug": "True"
+          },
+          "oslo_messaging_rabbit": {
+            "rabbit_userid": "%(rabbit_userid)s",
+            "rabbit_password": "%(rabbit_password)s"
+          },
+          "storage:sqlalchemy": {
+            "connection": "mysql+pymysql://designate:%(pf9-designate.db_password)s@localhost:3306/designate"
+          },
+          "service:mdns": {
+              "listen": "0.0.0.0:5354"
+          },
+          "keystone_authtoken": {
+            "admin_tenant_name": "%(pf9-designate.auth_tenant_name)s",
+            "admin_user": "%(pf9-designate.auth_user)s",
+            "admin_password": "%(pf9-designate.auth_pass)s"
+          }
+        }
+      }
+    }
+  }
+}

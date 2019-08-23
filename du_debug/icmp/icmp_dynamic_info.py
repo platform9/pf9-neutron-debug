@@ -7,6 +7,9 @@ import init_neutron_client
 import discovery
 
 class ICMPInfo:
+    """
+    Uses OpenStack SDK to retrieve all relevant information about a VM and the network it is on, for the ICMP ping Checker
+    """
 
     def __init__(self, source_vm, dest_vm, neutron):
         self.neutron = neutron

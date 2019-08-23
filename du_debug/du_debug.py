@@ -1,4 +1,4 @@
-# DU Server for RPC messaging
+# DU Server for RPC messaging and HTTP requests
 
 import sys
 sys.path.append('../common/')
@@ -47,13 +47,16 @@ class GetHostDataEndpoint(object):
         self.log_info = log_data.LogData()
 
     def recieve_dict(self, ctx, data, info):
-        print("_______________RETURNED JSON___________________")
-        print(data)
+        """
+        Retrieve packet data from host to log
+        """
         self.log_info.log_data(data, info)
 
     def get_message(self, ctx, message):
+        """
+        Retrieve message from host to log
+        """
         logs.info(message)
-        print(message)
 
 def main():
 
@@ -64,10 +67,12 @@ def main():
     target = oslo_messaging.Target(topic='myroutingkey', server='myserver', version='2.0', namespace='test')
     server = create_server(CONF, transport, target)
 
+    # Reset RPC server before starting
     server.start()
     server.stop()
     server.wait()
 
+    # Thread for RPC server
     server_thread = threading.Thread(target=server_process, args=(server,))
     server_thread.daemon = True
     server_thread.start()
@@ -75,13 +80,18 @@ def main():
     start_wsgi_server()
 
 def start_wsgi_server():
-
+    """
+    Uses WSGI to start a Flask server and listen for requests
+    """
     paste_file = CONF.paste_ini
     wsgi_app = loadapp('config:%s' % paste_file, "main")
     listen_port = CONF.listen_port
     wsgi.server(eventlet.listen(('', listen_port)), wsgi_app)
 
 def server_process(rpcserver):
+    """
+    Keeps RPC server on until KeyboardInterrupt
+    """
     try:
         rpcserver.reset()
         rpcserver.start()

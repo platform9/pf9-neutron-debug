@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Linux Commands to run to configure host
 
 yum install centos-release-scl

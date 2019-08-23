@@ -15,9 +15,8 @@ ARP_OP_TYPE = ['', 'REQUEST', 'REPLY']
 class ScapyDriver(object):
 
     def send_icmp_on_interface(self, interface_name,src_mac, dst_mac, src_ip, dst_ip, payload):
-        """Send DHCP Discovery over qvb device.
+        """Send ICMP Request over qbr device.
         """
-        #Figure out how to obtain this qvb_device ip
         src_ip = str(src_ip)
         dst_ip = str(dst_ip)
         src_mac = str(src_mac)
@@ -30,7 +29,7 @@ class ScapyDriver(object):
         scapy.sendp(packet, iface=interface_name)
 
     def send_dhcp_over_qbr(self, qbr_device, port_mac):
-        """Send DHCP Discovery over qvb device.
+        """Send DHCP Discovery over qbr device.
         """
         ethernet = scapy.Ether(dst='ff:ff:ff:ff:ff:ff',
                                src=port_mac, type=0x800)
@@ -45,6 +44,8 @@ class ScapyDriver(object):
         scapy.sendp(packet, iface=qbr_device)
 
     def send_arp_on_interface(self, interface_name, src_mac, src_ip, dst_ip):
+        """Send ARP Request over qbr device.
+        """
         ethernet = scapy.Ether(dst='ff:ff:ff:ff:ff:ff',
                                src=src_mac)
         arp = scapy.ARP(op="who-has", hwsrc=src_mac, psrc=src_ip, pdst=dst_ip)
@@ -60,21 +61,16 @@ class ScapyDriver(object):
         return DHCP_MESSATE_TYPE[message[1]], ether_packet.src, ether_packet.dst
 
     def get_icmp_mt(self, ether_packet):
+        """Pick out ICMP Message Type from buffer.
+        """
         icmp_packet = ether_packet[scapy.ICMP]
         icmp_type = icmp_packet.type
-        #data = icmp_packet.payload
-        #if data.load != payload:
-        #   print data.load, payload
-        #   return None
         if icmp_type in ICMP_MESSAGE_TYPE:
             return ICMP_MESSAGE_TYPE[icmp_type], ether_packet.src, ether_packet.dst
         return "UNKNOWN"
 
     def get_arp_op(self, ether_packet):
+        """Pick out ARP Message Type from buffer.
+        """
         arp_packet = ether_packet[scapy.ARP]
         return ARP_OP_TYPE[arp_packet.op], ether_packet.src, ether_packet.dst
-
-if __name__ == "__main__":
-    scapy_dr = ScapyDriver()
-    scapy_dr.send_dhcp_over_qbr("61352437-6a23-42b8-a8b1-e3337c306736"
-        ,"fa:16:3e:57:60:8c")

@@ -5,6 +5,11 @@ import requests
 VIF_PREFIX_LEN = 14
 DHCP_OWNER = 'network:dhcp'
 
+"""
+Contains many methods to get discovery information from neutron using the OpenStack SDK.
+Used in all of the __dynamic_info.py files
+"""
+
 # DU Side
 def heartbeat_host(host_id, neutron):
     auth_token = neutron.get_auth_info()['auth_token']

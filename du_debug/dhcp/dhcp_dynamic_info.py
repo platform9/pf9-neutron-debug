@@ -10,6 +10,9 @@ DHCP_OWNER = 'network:dhcp'
 VIF_PREFIX_LEN = 14
 
 class DHCPInfo:
+    """
+    Uses OpenStack SDK to retrieve all relevant information about a VM and the network it is on, for the DHCP Checker
+    """
 
     def __init__(self, vm_name, neutron):
 

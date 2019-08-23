@@ -1,0 +1,134 @@
+#!/opt/pf9/hostagent/bin/python
+
+# Copyright (c) 2015 Platform9 Systems Inc.
+# All Rights reserved
+
+import json
+import optparse
+import subprocess
+import sys
+
+from configutils import configutils
+
+NEUTRON_DEBUG_CONF = '/opt/pf9/etc/neutron-debug.conf'
+
+NEUTRON_DEBUG_KEYS = {
+    "DEFAULT": [
+        "debug"
+    ],
+    "oslo_messaging_rabbit": [
+        "rabbit_userid",
+        "rabbit_password",
+        "state_path"
+    ],
+    "keystone_authtoken": [
+        "admin_user",
+        "admin_password",
+        "admin_tenant_name",
+        "auth_uri",
+        "identity_uri"
+    ]
+}
+
+SERVICES = ['pf9-neutron-debug']
+
+def get_config(option, opt_str, value, parser):
+    """
+    Callback method invoked when get-config is called. Returns the configuration
+    that needs to be managed for this app. Writes a JSON string to stdout
+    :param option: Option object
+    :param str opt_str: Name of the option
+    :param str value: Value of the option
+    :param Parser parser: The optparse parser object
+    """
+    try:
+        neutron_debug_conf = configutils.extract_params(NEUTRON_DEBUG_KEYS, NEUTRON_DEBUG_CONF)
+        cfg = { 'neutron-debug': neutron_debug_conf
+                }
+
+        sys.stdout.write(json.dumps(cfg))
+    except Exception, e:
+        sys.stderr.write(str(e))
+        sys.exit(1)
+
+    sys.exit(0)
+
+
+def set_config(option, opt_str, value, parser):
+    """
+    Callback method invoked when set-config is called. Sets the configuration
+    that needs to be managed for this app. JSON configuration is passed as an
+    argument to the script
+    :param option: Option object
+    :param str opt_str: Name of the option
+    :param str value: Value of the option
+    :param Parser parser: The optparse parser object
+
+    """
+    try:
+        # Config to be set
+        cfg = json.loads(value)
+
+        neutron_debug_conf = cfg['neutron-debug']
+        configutils.merge_params(neutron_debug_conf, NEUTRON_DEBUG_CONF)
+
+    except Exception, e:
+        sys.stderr.write(str(e))
+        sys.exit(1)
+
+    # Restart the services
+    for svc in SERVICES:
+        proc = subprocess.Popen(['sudo', 'service', svc, 'restart'],
+                                stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE)
+        out, err = proc.communicate()
+        code = proc.returncode
+        if code:
+            sys.stdout.write(out)
+            sys.stderr.write("%s restart failed. {%d}:%s" % (svc, code, err))
+            sys.exit(1)
+
+    sys.exit(0)
+
+
+def get_services(option, opt_str, value, parser):
+    """
+    Callback method invoked when get-services is called. Returns
+    the names of the services this app can manage.
+    :param option: Option object
+    :param str opt_str: Name of the option
+    :param str value: Value of the option
+    :param Parser parser: The optparse parser object
+    """
+    sys.stdout.write(str(' '.join(SERVICES)))
+    sys.exit(0)
+
+
+def parse_args():
+    """
+    Build a parser with callbacks for the different options. The callback
+    function is called based on the option passed in.
+    """
+    parser = optparse.OptionParser()
+    parser.add_option("--get-config",
+                      action="callback",
+                      callback=get_config,
+                      help="Get the current neutron debug configuration.")
+    parser.add_option("--set-config",
+                      type='string',
+                      action="callback",
+                      callback=set_config,
+                      help="Set the current neutron debug configuration.")
+    parser.add_option("--get-services",
+                      action="callback",
+                      callback=get_services,
+                      help="Get a list of service names for the pf9app")
+    parser.parse_args()
+
+
+def main():
+    options = parse_args()
+
+
+if __name__ == "__main__":
+    main()

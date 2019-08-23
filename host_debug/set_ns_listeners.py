@@ -18,11 +18,20 @@ class SetNsListener:
         self.threads = []
 
     def init_listeners(self):
+        """
+        Sets up listeners on all namespace ports using manual tcpdump and writing to pcap file
+        """
+
         for vif in self.listener_dict['ns_vif_names']:
             for vif_name, vif_dict in vif.items():
                 self.threads.append(self.create_pcap_file(vif_dict['is_ns'], vif_name, vif_dict['filter']))
 
     def create_pcap_file(self, ns, vif_name, filter):
+        """
+        Creates a pcap file that contains packet data from tcpdump
+        Uses threading to set listeners on multiple ports at the same time
+        """
+
         tcp_thread = threading.Thread(target=tcpdump_process,args=(ns, vif_name, filter,))
         tcp_thread.start()
         return tcp_thread
@@ -32,6 +41,9 @@ class SetNsListener:
             thread.join()
 
     def collect_data(self):
+        """
+        Collects the packet data from previously created pcap file
+        """
 
         data = dict()
         tag = self.listener_dict['tag']
@@ -57,6 +69,10 @@ class SetNsListener:
 
 
 def tcpdump_process(ns, vif, filter):
+    """
+    Runs the tcpdump process on hosts
+    """
+
     p = subprocess.Popen('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, err = p.communicate()
     err = err.decode()

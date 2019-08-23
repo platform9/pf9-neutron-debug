@@ -7,6 +7,10 @@ def init_dnsmasq_check(dhcp_dict, host_id):
     return message
 
 def analyze_dnsmasq(dhcp_dict):
+    """
+    Checks to see if VM mac address and ip address are part of dnsmasq process
+    Stores ps command to file and checks
+    """
 
     process_flag = False
     os.system("ps ax | grep dnsmasq | grep %s > dnsmasq.txt" % (dhcp_dict['network_id']))
@@ -34,6 +38,9 @@ def analyze_dnsmasq(dhcp_dict):
     return 0
 
 def diagnose_dnsmasq(error_code, host_id, network_id):
+    """
+    Outputs error message based on code
+    """
 
     if error_code == 0:
         message = "CODE 0: Successfully identified dnsmasq process for network %s on host %s and found MAC and IP for source VM of interest in dnsmasq" % (network_id, host_id)

@@ -12,6 +12,11 @@ VIF_PREFIX_LEN = 14
 logger = logging.getLogger("main_logger")
 
 class LogData:
+    """
+    Recieves a dictionary containing packet data, and decides if this data contains errors or not.
+    Then, logs this data to log file
+    """
+
     def __init__(self):
         self.remote = []
         self.local = {}

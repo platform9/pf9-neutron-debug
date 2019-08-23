@@ -15,6 +15,9 @@ from oslo_log import log as logging
 oslo_messaging.set_transport_defaults('myexchange')
 
 class RPCClientObject:
+    """
+    This class can be instantiated as an object that contains every RPC call needed for this service
+    """
 
     def __init__(self, conf):
 
@@ -25,13 +28,12 @@ class RPCClientObject:
     def get_rpc_client(self):
         return self.client
 
-    # DHCP RPC Message Functions
     def check_dnsmasq_process(self, dhcp_dict, host_id):
         cctxt = self.client.prepare(server=host_id)
         flag = cctxt.call({}, 'dnsmasq_check', dhcp_d = dhcp_dict, host_id = host_id)
         return flag
 
-    # ALl other RPC functions
+    # Set listeners on host
     def listen_on_host(self, listen_dict):
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])
@@ -42,6 +44,7 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=listen_dict['host_id'])
         cctxt.cast({}, 'set_ns_port_listeners', listener_dict = listen_dict)
 
+    # Inject packet type on VM
     def source_dhcp_inject(self, inject_dict):
 
         cctxt = self.client.prepare(server=inject_dict['host_id'])
@@ -57,6 +60,7 @@ class RPCClientObject:
         cctxt = self.client.prepare(server=inject_dict['host_id'])
         cctxt.cast({}, 'inject_arp_packet', inject_dict = inject_dict)
 
+    # Retrieve packet data from hosts
     def retrieve_listener_data(self, listen_dict):
 
         cctxt = self.client.prepare(server=listen_dict['host_id'])

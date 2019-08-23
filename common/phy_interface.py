@@ -1,6 +1,6 @@
 import subprocess
 
-
+# Gets nic interface name based off bridge
 def get_phy_interface(bridge_name):
     out = subprocess.Popen(['ovs-vsctl','list-ports',bridge_name], stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
     stdout,stderr = out.communicate()
@@ -10,4 +10,3 @@ def get_phy_interface(bridge_name):
         if "phy" not in port and len(port) > 0:
            return port
     return "No nic found"
-

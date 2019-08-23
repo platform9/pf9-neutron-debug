@@ -8,10 +8,12 @@ import discovery
 import logging
 import coloredlogs
 
-#logger.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logger.INFO)
 logger = logging.getLogger("main_logger")
 
 def run_du_static_checks(vm_name, neutron):
+    """
+    Runs heartbeat checks on hosts to see if ports are up
+    """
 
     vm_name = discovery.vmname_parse(vm_name)
     vm_port_dict = discovery.get_port_dict(vm_name, neutron)
@@ -36,6 +38,9 @@ def run_du_static_checks(vm_name, neutron):
     return fail_code
 
 def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
+    """
+    Based on error code from hosts, determine the error message
+    """
 
     if vm_host_code == 1:
         logger.info("VM HOST is down, unable to run DHCP traffic tests\n")
@@ -61,4 +66,5 @@ def diagnose_error(vm_host_code, vm_code, host_error_dict, dhcp_error_dict):
         return 1
 
     logger.info("HEARTBEAT tests look OK, ready to move on")
+    logger.info("")
     return 0

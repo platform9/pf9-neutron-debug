@@ -14,7 +14,6 @@ import coloredlogs
 
 neutron = init_neutron_client.make_neutron_object()
 
-#logging.basicConfig(filename='/var/log/neutron_debug/neutron_debug.log', filemode = 'w', format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
 logger = logging.getLogger("main_logger")
 
 fh = logging.FileHandler('/var/log/neutron_debug/neutron_debug.log')
@@ -29,9 +28,12 @@ coloredlogs.install(level='DEBUG')
 
 def run_arp_checker(source_vm, client_obj):
 
+    # Get ARP info in relation to VM from OpenStack SDK
     source_arp_dict, inject_arp_dict, host_dict = get_arp_info(source_vm)
 
+    # Makes RPC calls to set listeners, inject packet, and retrieve results
     if source_arp_dict['network_type'] == "vxlan":
+        logger.info("ARP CHECKER for VXLAN")
         client_obj.listen_on_host(source_arp_dict)
         time.sleep(3)
         client_obj.source_arp_inject(inject_arp_dict)
@@ -46,14 +48,11 @@ def run_arp_checker(source_vm, client_obj):
 
 def run_dhcp_checker(vm_name, client_obj):
 
+    # Get DHCP info in relation to VM from OpenStack SDK
+    logger.info("DHCP CHECKER")
     vm_dict, dhcp_list, inject_dict = get_dhcp_info(vm_name)
-    print("VM DICT")
-    print(vm_dict)
-    print("DHCP LIST")
-    print(dhcp_list)
-    print("INJECT DICT")
-    print(inject_dict)
 
+    # Checks for dnsmasq process
     for dhcp_dict in dhcp_list:
         message = client_obj.check_dnsmasq_process(vm_dict, dhcp_dict['host_id'])
         logger.info(message)
@@ -61,6 +60,7 @@ def run_dhcp_checker(vm_name, client_obj):
            sys.exit()
     logger.info("")
 
+    # Makes RPC calls to set listeners, inject packet, and retrieve results
     client_obj.listen_on_host(vm_dict)
     for dhcp_dict in dhcp_list:
         if dhcp_dict['host_id'] != vm_dict['host_id']:
@@ -81,8 +81,11 @@ def run_dhcp_checker(vm_name, client_obj):
 
 def run_icmp_checker(source_vm, dest_vm, client_obj):
 
+    # Get ping info in relation to VM from OpenStack SDK
+    logger.info("PING CHECKER")
     source_icmp_dict, dest_icmp_dict, inject_icmp_dict = get_icmp_info(source_vm, dest_vm)
 
+    # Makes RPC calls to set listeners, inject packet, and retrieve results
     client_obj.listen_on_host(source_icmp_dict)
     client_obj.listen_on_host(dest_icmp_dict)
     time.sleep(3)
@@ -95,8 +98,11 @@ def run_icmp_checker(source_vm, dest_vm, client_obj):
 
 def run_fip_checker(vm_name, client_obj):
 
+    # Get FIP info in relation to VM from OpenStack SDK
+    logger.info("Floating IP(FIP) CHECKER")
     listen_fip_dict, inject_fip_dict = get_fip_info(vm_name)
 
+    # Makes RPC calls to set listeners, inject packet, and retrieve results
     client_obj.listen_on_host(listen_fip_dict)
     client_obj.listen_ns_on_host(listen_fip_dict)
     time.sleep(3)
@@ -111,15 +117,13 @@ def run_fip_checker(vm_name, client_obj):
 
 def run_snat_checker(vm_name, client_obj):
 
+    # Get SNAT info in relation to VM from OpenStack SDK
+    logger.info("SNAT CHECKER")
     listen_local_snat_dict, listen_remote_snat_dict, inject_snat_dict, flag = get_snat_info(vm_name)
-
-    print("LOCAL SNAT")
-    print(listen_local_snat_dict)
-    print("REMOTE SNAT")
-    print(listen_remote_snat_dict)
 
     snat_resp = dict()
 
+    # Makes RPC calls to set listeners, inject packet, and retrieve results
     if flag == "local":
         client_obj.listen_on_host(listen_local_snat_dict)
         client_obj.listen_ns_on_host(listen_local_snat_dict)
@@ -160,6 +164,9 @@ def get_arp_info(vm_name):
     return source_arp_dict, inject_arp_dict, host_dict
 
 def analyze_arp_data(host_dict, arp_response_dict):
+    """
+    Analysis to determine if ARP packet was sent to every host
+    """
 
     expected_tunnel_ips = host_dict.values()
     actual_tunnel_ips = []
@@ -181,6 +188,7 @@ def analyze_arp_data(host_dict, arp_response_dict):
     return message, code
 
 def get_dhcp_info(vm_name):
+
     dhcp_info = dhcp_dynamic_info.DHCPInfo(vm_name, neutron)
     vm_dict = dhcp_info.get_vm_dict()
     dhcp_list = dhcp_info.get_dhcp_list()
