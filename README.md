@@ -41,6 +41,8 @@ pip install -r requirements.txt(on venv)
 3. Now that the service is up and running on the DU/hosts, make your curl request(check below table) with VM name and checker type to run packet injection and inspection.
 4. Wait for HTTP response, and then check /var/log/neutron_debug/neutron_debug.log for more details.
 
+(NOTE: Service must be run on root permissions)
+
 | Request Type | URL                                         | Description                         |
 | ------------ | ------------------------------------------- | ----------------------------------- |
 | GET          | neutron_debug/v1/dhcp/<vm_name>             | Runs ping checker between vms       |
@@ -70,3 +72,4 @@ pip install -r requirements.txt(on venv)
   - A heartbeat check that checks to see if VM or namespace port is down.
   - A dnsmasq checker that makes sure the DHCP process is running on each host with a DHCP server.
 - This tool is currently running on Python 2.7, but is compatible with Python 3. All you must do is replace the current files with the corresponding files in the "python3" folder in pf9-neutron-debug.
+- Service must be run on root permissions on hosts and DU.
