@@ -1,0 +1,125 @@
+pf9 ALL=(root) NOPASSWD: /opt/pf9/pf9-neutron/bin/neutron-rootwrap /opt/pf9/etc/pf9-neutron/rootwrap.conf *, \
+               NOPASSWD: /usr/sbin/iptables -L *, \
+               NOPASSWD: /usr/sbin/iptables -S *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ifconfig -a, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ping *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* traceroute *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* tcpdump *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* timeout *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip addr, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip neighbor, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* arp *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* route -eevn,\
+               NOPASSWD: /usr/sbin/ip netns exec snat* netstat -rn, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip -s link, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip link, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip rule, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* ip route show *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* iptables -L *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* iptables -S *, \
+               NOPASSWD: /usr/sbin/ip netns exec snat* arping *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ifconfig -a, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ping *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* traceroute *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* tcpdump *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* timeout *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip addr, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip neighbor, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* arp *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* route -eevn, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* netstat -rn, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip -s link, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip link, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip rule, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* ip route show *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* iptables -L *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* iptables -S *, \
+               NOPASSWD: /usr/sbin/ip netns exec fip* arping *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ifconfig -a, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ping *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* traceroute *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* tcpdump *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* timeout *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip addr, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip neighbor, \
+               NOPASSWD: /usr/sbin/ip netns exec q* arp *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* route -eevn, \
+               NOPASSWD: /usr/sbin/ip netns exec q* netstat -rn, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip -s link, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip link, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip rule, \
+               NOPASSWD: /usr/sbin/ip netns exec q* ip route show *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* iptables -L *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* iptables -S *, \
+               NOPASSWD: /usr/sbin/ip netns exec q* arping *, \
+               NOPASSWD: /usr/sbin/iptables -L *, \
+               NOPASSWD: /usr/sbin/iptables -S *, \
+               NOPASSWD: /sbin/ip netns exec snat* ifconfig -a, \
+               NOPASSWD: /sbin/ip netns exec snat* ping *, \
+               NOPASSWD: /sbin/ip netns exec snat* traceroute *, \
+               NOPASSWD: /sbin/ip netns exec snat* tcpdump *, \
+               NOPASSWD: /sbin/ip netns exec snat* timeout *, \
+               NOPASSWD: /sbin/ip netns exec snat* ip addr, \
+               NOPASSWD: /sbin/ip netns exec snat* ip neighbor, \
+               NOPASSWD: /sbin/ip netns exec snat* arp *, \
+               NOPASSWD: /sbin/ip netns exec snat* route -eevn,\
+               NOPASSWD: /sbin/ip netns exec snat* netstat -rn, \
+               NOPASSWD: /sbin/ip netns exec snat* ip -s link, \
+               NOPASSWD: /sbin/ip netns exec snat* ip link, \
+               NOPASSWD: /sbin/ip netns exec snat* ip rule, \
+               NOPASSWD: /sbin/ip netns exec snat* ip route show *, \
+               NOPASSWD: /sbin/ip netns exec snat* iptables -L *, \
+               NOPASSWD: /sbin/ip netns exec snat* iptables -S *, \
+               NOPASSWD: /sbin/ip netns exec snat* arping *, \
+               NOPASSWD: /sbin/ip netns exec fip* ifconfig -a, \
+               NOPASSWD: /sbin/ip netns exec fip* ping *, \
+               NOPASSWD: /sbin/ip netns exec fip* traceroute *, \
+               NOPASSWD: /sbin/ip netns exec fip* tcpdump *, \
+               NOPASSWD: /sbin/ip netns exec fip* timeout *, \
+               NOPASSWD: /sbin/ip netns exec fip* ip addr, \
+               NOPASSWD: /sbin/ip netns exec fip* ip neighbor, \
+               NOPASSWD: /sbin/ip netns exec fip* arp *, \
+               NOPASSWD: /sbin/ip netns exec fip* route -eevn, \
+               NOPASSWD: /sbin/ip netns exec fip* netstat -rn, \
+               NOPASSWD: /sbin/ip netns exec fip* ip -s link, \
+               NOPASSWD: /sbin/ip netns exec fip* ip link, \
+               NOPASSWD: /sbin/ip netns exec fip* ip rule, \
+               NOPASSWD: /sbin/ip netns exec fip* ip route show *, \
+               NOPASSWD: /sbin/ip netns exec fip* iptables -L *, \
+               NOPASSWD: /sbin/ip netns exec fip* iptables -S *, \
+               NOPASSWD: /sbin/ip netns exec fip* arping *, \
+               NOPASSWD: /sbin/ip netns exec q* ifconfig -a, \
+               NOPASSWD: /sbin/ip netns exec q* ping *, \
+               NOPASSWD: /sbin/ip netns exec q* traceroute *, \
+               NOPASSWD: /sbin/ip netns exec q* tcpdump *, \
+               NOPASSWD: /sbin/ip netns exec q* timeout *, \
+               NOPASSWD: /sbin/ip netns exec q* ip addr, \
+               NOPASSWD: /sbin/ip netns exec q* ip neighbor, \
+               NOPASSWD: /sbin/ip netns exec q* arp *, \
+               NOPASSWD: /sbin/ip netns exec q* route -eevn, \
+               NOPASSWD: /sbin/ip netns exec q* netstat -rn, \
+               NOPASSWD: /sbin/ip netns exec q* ip -s link, \
+               NOPASSWD: /sbin/ip netns exec q* ip link, \
+               NOPASSWD: /sbin/ip netns exec q* ip rule, \
+               NOPASSWD: /sbin/ip netns exec q* ip route show *, \
+               NOPASSWD: /sbin/ip netns exec q* iptables -L *, \
+               NOPASSWD: /sbin/ip netns exec q* iptables -S *, \
+               NOPASSWD: /sbin/ip netns exec q* arping *, \
+               NOPASSWD: /sbin/tcpdump *, \
+               NOPASSWD: /usr/sbin/tcpdump *, \
+               NOPASSWD: /usr/bin/ovs-vsctl show, \
+               NOPASSWD: /usr/bin/ovs-vsctl list Open_vSwitch *, \
+               NOPASSWD: /usr/bin/ovs-vsctl list Bridge *, \
+               NOPASSWD: /usr/bin/ovs-vsctl list Port *, \
+               NOPASSWD: /usr/bin/ovs-vsctl list-ports *, \
+               NOPASSWD: /usr/bin/ovs-vsctl list Interface *, \
+               NOPASSWD: /usr/bin/ovs-ofctl show *, \
+               NOPASSWD: /usr/bin/ovs-ofctl dump-flows *, \
+               NOPASSWD: /usr/bin/ovs-appctl *, \
+               NOPASSWD: /usr/bin/ps ax *, \
+               NOPASSWD: /bin/tar -cf /var/log/pf9/openvswitch.tar /var/log/openvswitch, \
+               NOPASSWD: /bin/chown pf9\:pf9group /var/log/pf9/*
+
+Defaults:pf9 !requiretty
+Defaults!/opt/pf9/pf9-neutron/bin/neutron-rootwrap env_keep+=PYTHONPATH
+Defaults!/opt/pf9/pf9-neutron/bin/neutron-rootwrap env_keep+=LD_LIBRARY_PATH

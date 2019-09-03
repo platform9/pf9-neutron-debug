@@ -13,7 +13,7 @@ def analyze_dnsmasq(dhcp_dict):
     """
 
     process_flag = False
-    os.system("ps ax | grep dnsmasq | grep %s > dnsmasq.txt" % (dhcp_dict['network_id']))
+    os.system("sudo ps ax | grep dnsmasq | grep %s > dnsmasq.txt" % (dhcp_dict['network_id']))
     with open('dnsmasq.txt') as file:
         output = file.readlines()
     for line in output:

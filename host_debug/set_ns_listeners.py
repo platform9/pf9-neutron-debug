@@ -73,7 +73,7 @@ def tcpdump_process(ns, vif, filter):
     Runs the tcpdump process on hosts
     """
 
-    p = subprocess.Popen('ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    p = subprocess.Popen('sudo ip netns exec %s timeout %d tcpdump -l -evvvnn -i %s %s -w "../pcap/%s.pcap"' % (ns, TIMEOUT, vif, filter, vif), stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     output, err = p.communicate()
     err = err.decode()
     if "No such device exists" in err:
