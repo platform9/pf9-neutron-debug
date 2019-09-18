@@ -25,7 +25,7 @@ from paste.deploy import loadapp
 CONF = cfg.CONF
 
 cli_opts = [
-    cfg.StrOpt('paste_ini',default='/home/pranav/pf9-neutron-debug/du_debug/api/api-paste.ini')
+    cfg.StrOpt('paste_ini',default='/etc/pf9-debug/api-paste.ini')
 ]
 paste_opts = [
     cfg.IntOpt('listen_port', default=8330)
