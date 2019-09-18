@@ -1,8 +1,7 @@
 import sys
-sys.path.append('../common/')
 
-import discovery
-import phy_interface
+from debug.common import discovery
+from debug.common import phy_interface
 import pcap_driver
 import scapy_driver
 import time

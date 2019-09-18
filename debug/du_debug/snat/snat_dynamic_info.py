@@ -1,10 +1,9 @@
 import sys
-sys.path.append('../../common/')
 
 import pdb
 import os
-import init_neutron_client
-import discovery
+from debug.common import init_neutron_client
+from debug.common import discovery
 
 PORT_ID_PREFEX = 10
 

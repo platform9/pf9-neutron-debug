@@ -1,12 +1,13 @@
 import sys
-sys.path.append("../")
 
-import arp_dynamic_info
-import dhcp_dynamic_info
-import icmp_dynamic_info
-import init_neutron_client
-import fip_dynamic_info
-import snat_dynamic_info
+from debug.du_debug.arp import arp_dynamic_info
+from debug.du_debug.dhcp import dhcp_dynamic_info
+from debug.du_debug.icmp import icmp_dynamic_info
+from debug.du_debug.fip import fip_dynamic_info
+from debug.du_debug.snat import snat_dynamic_info
+
+from debug.du_debug.common import init_neutron_client
+
 import logging
 import pdb
 import time

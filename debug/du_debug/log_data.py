@@ -1,10 +1,9 @@
 import logging
 import coloredlogs
 import sys
-sys.path.append('../common/')
 
-import init_neutron_client
-import discovery
+from debug.common import init_neutron_client
+from debug.common import discovery
 
 DHCP_SERVER_PREFIX = "DHCP SERVER "
 VIF_PREFIX_LEN = 14
