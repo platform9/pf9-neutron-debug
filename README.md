@@ -45,8 +45,8 @@ pip install -r requirements.txt(on venv)
 
 | Request Type | URL                                         | Description                         |
 | ------------ | ------------------------------------------- | ----------------------------------- |
-| GET          | neutron_debug/v1/dhcp/<vm_name>             | Runs ping checker between vms       |
-| GET          | neutron_debug/v1/ping/<source_vm>/<dest_vm> | Runs DHCP checker on vm             |
+| GET          | neutron_debug/v1/dhcp/<vm_name>             | Runs DHCP checker on vm             |
+| GET          | neutron_debug/v1/ping/<source_vm>/<dest_vm> | Runs ping checker between vms       |
 | GET          | neutron_debug/v1/fip/<vm_name>              | Runs FIP(Floating IP) checker on vm |
 | GET          | neutron_debug/v1/snat/<vm_name>             | Runs SNAT checker on vm             |
 
